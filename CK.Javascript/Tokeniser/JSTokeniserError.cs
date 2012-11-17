@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CK.Javascript
 {
-    public enum JSParserError
+    public enum JSTokeniserError
     {
         None = 0,
 

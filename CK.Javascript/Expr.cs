@@ -57,14 +57,14 @@ namespace CK.Javascript
 
     public class UnaryExpr : Expr
     {
-        public UnaryExpr( SourceLocation location, JSParserToken type, Expr e )
+        public UnaryExpr( SourceLocation location, JSTokeniserToken type, Expr e )
             : base( location )
         {
             TokenType = type;
             Expression = e;
         }
 
-        public JSParserToken TokenType { get; private set; }
+        public JSTokeniserToken TokenType { get; private set; }
 
         public Expr Expression { get; private set; }
 
@@ -76,7 +76,7 @@ namespace CK.Javascript
 
         public override string ToString()
         {
-            return JSParser.Explain( TokenType ) + Expression.ToString();
+            return JSTokeniser.Explain( TokenType ) + Expression.ToString();
         }
     }
 
@@ -231,7 +231,7 @@ namespace CK.Javascript
 
     public class BinaryExpr : Expr
     {
-        public BinaryExpr( SourceLocation location, Expr left, JSParserToken binaryOperatorToken, Expr right )
+        public BinaryExpr( SourceLocation location, Expr left, JSTokeniserToken binaryOperatorToken, Expr right )
             : base( location )
         {
             Left = left;
@@ -241,7 +241,7 @@ namespace CK.Javascript
 
         public Expr Left { get; private set; }
 
-        public JSParserToken BinaryOperatorToken { get; private set; }
+        public JSTokeniserToken BinaryOperatorToken { get; private set; }
 
         public Expr Right { get; private set; }
 
@@ -253,7 +253,7 @@ namespace CK.Javascript
 
         public override string ToString()
         {
-            return Left.ToString() + JSParser.Explain( BinaryOperatorToken ) + Right.ToString();
+            return Left.ToString() + JSTokeniser.Explain( BinaryOperatorToken ) + Right.ToString();
         }
     }
 

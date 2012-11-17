@@ -9,9 +9,9 @@ namespace CK.Javascript
 {
     public class ExprAnalyser
     {
-        static readonly int _questionMarkPrecedenceLevel = JSParser.PrecedenceLevel( JSParserToken.QuestionMark );
+        static readonly int _questionMarkPrecedenceLevel = JSTokeniser.PrecedenceLevel( JSTokeniserToken.QuestionMark );
 
-        JSParser _parser;
+        JSTokeniser _parser;
         ISyntaxicScope _scope;
 
         public ExprAnalyser( ISyntaxicScope scope )
@@ -20,7 +20,7 @@ namespace CK.Javascript
             _scope = scope;
         }
 
-        public Expr Analyse( JSParser p )
+        public Expr Analyse( JSTokeniser p )
         {
             _parser = p;
             return Expression( 0 );
@@ -46,13 +46,13 @@ namespace CK.Javascript
             Debug.Assert( !_parser.IsErrorOrEndOfInput );
             if( _parser.IsNumber ) return HandleNumber();
             if( _parser.IsString ) return new ConstantExpr( _parser.Location, _parser.ReadString() );
-            if( _parser.IsUnaryOperatorExtended || _parser.CurrentToken == JSParserToken.Minus ) return HandleUnaryExpr();
+            if( _parser.IsUnaryOperatorExtended || _parser.CurrentToken == JSTokeniserToken.Minus ) return HandleUnaryExpr();
             if( _parser.IsIdentifier ) return HandleIdentifier();
-            if( _parser.Match( JSParserToken.OpenPar ) )
+            if( _parser.Match( JSTokeniserToken.OpenPar ) )
             {
                 SourceLocation location = _parser.PrevNonCommentLocation;
                 Expr e = Expression( 0 );
-                return _parser.Match( JSParserToken.ClosePar ) ? e : new SyntaxErrorExpr( _parser.Location, "Expected ) opened at {0}.", location );
+                return _parser.Match( JSTokeniserToken.ClosePar ) ? e : new SyntaxErrorExpr( _parser.Location, "Expected ) opened at {0}.", location );
             }
             return new SyntaxErrorExpr( _parser.Location, "Syntax Error." );
         }
@@ -61,10 +61,10 @@ namespace CK.Javascript
         {
             if( _parser.IsBinaryOperator || _parser.IsCompareOperator ) return HandleBinaryExpr( left );
             if( _parser.IsLogical ) return HandleLogicalExpr( left );
-            if( _parser.Match( JSParserToken.Dot ) ) return HandleMember( left );
-            if( _parser.Match( JSParserToken.OpenSquare ) ) return HandleIndexer( left );
-            if( _parser.Match( JSParserToken.OpenPar ) ) return HandleCall( left );
-            if( _parser.Match( JSParserToken.QuestionMark ) ) return HandleTernaryConditional( left );
+            if( _parser.Match( JSTokeniserToken.Dot ) ) return HandleMember( left );
+            if( _parser.Match( JSTokeniserToken.OpenSquare ) ) return HandleIndexer( left );
+            if( _parser.Match( JSTokeniserToken.OpenPar ) ) return HandleCall( left );
+            if( _parser.Match( JSTokeniserToken.QuestionMark ) ) return HandleTernaryConditional( left );
             return new SyntaxErrorExpr( _parser.Location, "Syntax Error." );
         }
 
@@ -79,7 +79,7 @@ namespace CK.Javascript
             SourceLocation loc = _parser.PrevNonCommentLocation;
             Expr i = Expression( 0 );
             if( i is SyntaxErrorExpr ) return i;
-            if( !_parser.Match( JSParserToken.CloseBracket ) )
+            if( !_parser.Match( JSTokeniserToken.CloseBracket ) )
             {
                 return new SyntaxErrorExpr( _parser.Location, "Expected ] opened at {0}.", loc );
             }
@@ -90,19 +90,19 @@ namespace CK.Javascript
         {
             SourceLocation loc = _parser.PrevNonCommentLocation;
             IList<Expr> parameters = null;
-            if( !_parser.Match( JSParserToken.ClosePar ) )
+            if( !_parser.Match( JSTokeniserToken.ClosePar ) )
             {
                 for( ; ; )
                 {
-                    Debug.Assert( JSParser.PrecedenceLevel( JSParserToken.Comma ) == 2 );
+                    Debug.Assert( JSTokeniser.PrecedenceLevel( JSTokeniserToken.Comma ) == 2 );
                     Expr e = Expression( 2 );
                     if( e is SyntaxErrorExpr ) return e;
 
                     if( parameters == null ) parameters = new List<Expr>();
                     parameters.Add( e );
 
-                    if( _parser.Match( JSParserToken.ClosePar ) ) break;
-                    if( !_parser.Match( JSParserToken.Comma ) )
+                    if( _parser.Match( JSTokeniserToken.ClosePar ) ) break;
+                    if( !_parser.Match( JSTokeniserToken.Comma ) )
                     {
                         return new SyntaxErrorExpr( _parser.Location, "Expected ) opened at {0}.", loc );
                     }
@@ -132,20 +132,20 @@ namespace CK.Javascript
         {
             _parser.Forward();
             // Unary operators are JSParserToken.OpLevel14, except Minus that is classified as a binary operator and is associated to JSParserToken.OpLevel12.
-            return new UnaryExpr( _parser.PrevNonCommentLocation, _parser.PrevNonCommentToken, Expression( JSParser.PrecedenceLevel( JSParserToken.OpLevel14 ) ) );
+            return new UnaryExpr( _parser.PrevNonCommentLocation, _parser.PrevNonCommentToken, Expression( JSTokeniser.PrecedenceLevel( JSTokeniserToken.OpLevel14 ) ) );
         }
 
         Expr HandleBinaryExpr( Expr left )
         {
             _parser.Forward();
-            return new BinaryExpr( _parser.PrevNonCommentLocation, left, _parser.PrevNonCommentToken, Expression( JSParser.PrecedenceLevel( _parser.PrevNonCommentToken ) ) );
+            return new BinaryExpr( _parser.PrevNonCommentLocation, left, _parser.PrevNonCommentToken, Expression( JSTokeniser.PrecedenceLevel( _parser.PrevNonCommentToken ) ) );
         }
 
         Expr HandleLogicalExpr( Expr left )
         {
             _parser.Forward();
             // Right associative operators to support short-circuit (hence the -1 on the level).
-            return new BinaryExpr( _parser.PrevNonCommentLocation, left, _parser.PrevNonCommentToken, Expression( JSParser.PrecedenceLevel( _parser.PrevNonCommentToken ) - 1 ) );
+            return new BinaryExpr( _parser.PrevNonCommentLocation, left, _parser.PrevNonCommentToken, Expression( JSTokeniser.PrecedenceLevel( _parser.PrevNonCommentToken ) - 1 ) );
         }
 
         Expr HandleTernaryConditional( Expr left )
@@ -153,7 +153,7 @@ namespace CK.Javascript
             SourceLocation qLoc = _parser.PrevNonCommentLocation;
             Expr whenTrue = Expression( _questionMarkPrecedenceLevel );
             if( whenTrue is SyntaxErrorExpr ) return whenTrue;
-            if( !_parser.Match( JSParserToken.Colon ) ) return new SyntaxErrorExpr( _parser.Location, "Expected colon (:) after ? at {0}.", qLoc );
+            if( !_parser.Match( JSTokeniserToken.Colon ) ) return new SyntaxErrorExpr( _parser.Location, "Expected colon (:) after ? at {0}.", qLoc );
             return new IfExpr( qLoc, true, left, whenTrue, Expression( _questionMarkPrecedenceLevel ) );
         }
 

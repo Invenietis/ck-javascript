@@ -28,25 +28,25 @@ namespace CK.Javascript
     ///  1  ,                                       Multiple evaluation
     /// </remarks>
     [Flags]
-    public enum JSParserToken
+    public enum JSTokeniserToken
     {
         None = 0,
 
         #region JSParserError values bits n°31 to 26.
-        IsErrorOrEndOfInput = JSParserError.IsErrorOrEndOfInput,
-        EndOfInput = JSParserError.EndOfInput,
-        ErrorMask = JSParserError.ErrorMask,
-        ErrorInvalidChar = JSParserError.ErrorInvalidChar,
-        ErrorStringMask = JSParserError.ErrorStringMask,
-        ErrorNumberMask = JSParserError.ErrorNumberMask,
-        ErrorRegexMask = JSParserError.ErrorRegexMask,
-        ErrorStringUnterminated = JSParserError.ErrorStringUnterminated,
-        ErrorStringEmbeddedUnicodeValue = JSParserError.ErrorStringEmbeddedUnicodeValue,
-        ErrorStringEmbeddedHexaValue = JSParserError.ErrorStringEmbeddedHexaValue,
-        ErrorStringUnexpectedCRInLineContinuation = JSParserError.ErrorStringUnexpectedCRInLineContinuation,
-        ErrorNumberUnterminatedValue = JSParserError.ErrorNumberUnterminatedValue,
-        ErrorNumberValue = JSParserError.ErrorNumberValue,
-        ErrorRegexUnterminated = JSParserError.ErrorRegexUnterminated,
+        IsErrorOrEndOfInput = JSTokeniserError.IsErrorOrEndOfInput,
+        EndOfInput = JSTokeniserError.EndOfInput,
+        ErrorMask = JSTokeniserError.ErrorMask,
+        ErrorInvalidChar = JSTokeniserError.ErrorInvalidChar,
+        ErrorStringMask = JSTokeniserError.ErrorStringMask,
+        ErrorNumberMask = JSTokeniserError.ErrorNumberMask,
+        ErrorRegexMask = JSTokeniserError.ErrorRegexMask,
+        ErrorStringUnterminated = JSTokeniserError.ErrorStringUnterminated,
+        ErrorStringEmbeddedUnicodeValue = JSTokeniserError.ErrorStringEmbeddedUnicodeValue,
+        ErrorStringEmbeddedHexaValue = JSTokeniserError.ErrorStringEmbeddedHexaValue,
+        ErrorStringUnexpectedCRInLineContinuation = JSTokeniserError.ErrorStringUnexpectedCRInLineContinuation,
+        ErrorNumberUnterminatedValue = JSTokeniserError.ErrorNumberUnterminatedValue,
+        ErrorNumberValue = JSTokeniserError.ErrorNumberValue,
+        ErrorRegexUnterminated = JSTokeniserError.ErrorRegexUnterminated,
         #endregion
 
         #region Operator precedence bits n°25 to 21 (levels from 0 to 15).

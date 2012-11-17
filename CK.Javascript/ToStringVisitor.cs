@@ -72,7 +72,7 @@ namespace CK.Javascript
         {
             _b.Append( _exprPrefix );
             VisitExpr( e.Left );
-            _b.Append( JSParser.Explain( e.BinaryOperatorToken ) );
+            _b.Append( JSTokeniser.Explain( e.BinaryOperatorToken ) );
             VisitExpr( e.Right );
             _b.Append( _exprSuffix );
             return e;
@@ -110,7 +110,7 @@ namespace CK.Javascript
         public override Expr Visit( UnaryExpr e )
         {
             _b.Append( _exprPrefix );
-            _b.Append( JSParser.Explain( e.TokenType ) );
+            _b.Append( JSTokeniser.Explain( e.TokenType ) );
             _b.Append( ' ' );
             VisitExpr( e.Expression );
             _b.Append( _exprSuffix );

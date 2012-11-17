@@ -251,7 +251,7 @@ namespace CK.MultiPlan.Tests.Language
 
         static RuntimeObj Eval( string s )
         {
-            JSParser p = new JSParser();
+            JSTokeniser p = new JSTokeniser();
             p.Reset( s );
             ExprAnalyser a = new ExprAnalyser( new StaticSyntaxicScope() );
             Expr e = a.Analyse( p );
