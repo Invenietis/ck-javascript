@@ -20,6 +20,10 @@ namespace CK.MultiPlan.Tests.Language
                 Assert.That( o.ToDouble(), Is.EqualTo( 6 ) );
             }
             {
+                o = Eval( "6+++8" );
+                Assert.That( o is RuntimeError );
+            }
+            {
                 o = Eval( "(6+6)*3/4*2" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( (6.0 + 6.0) * 3.0 / 4.0 * 2.0 ) );

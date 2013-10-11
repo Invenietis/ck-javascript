@@ -3,7 +3,7 @@ using CK.Core;
 
 namespace CK.Javascript
 {
-    public interface IExprVisitor<T>
+    public interface IExprVisitor<out T>
     {
         T VisitExpr( Expr e );
         T Visit( AccessorMemberExpr e );
