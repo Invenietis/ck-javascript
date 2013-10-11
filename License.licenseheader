@@ -1,6 +1,8 @@
-﻿#region LGPL License
+extensions: designer.cs generated.cs
+extensions: .cs
+#region LGPL License
 /* ----------------------------------------------------------------------------
-*  This file (IEvalVisitor.cs) is part of CK-Javascript. 
+*  This file (%FileName%) is part of CK-Javascript. 
 *   
 *  CK-Javascript is free software: you can redistribute it and/or modify 
 *  it under the terms of the GNU Lesser General Public License as published 
@@ -14,25 +16,9 @@
 *  You should have received a copy of the GNU Lesser General Public License 
 *  along with CK-Javascript.  If not, see <http://www.gnu.org/licenses/>. 
 *   
-*  Copyright © 2013, 
+*  Copyright © %CurrentYear%, 
 *      Invenietis <http://www.invenietis.com>
 *  All rights reserved. 
 * -----------------------------------------------------------------------------*/
 #endregion
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace CK.Javascript
-{
-    public  interface IEvalVisitor : IExprVisitor<Expr>
-    {
-        GlobalContext Global { get; }
-
-        RuntimeObj Current { get; }
-        
-        RuntimeError CurrentError { get; }
-    }
-
-}

@@ -55,6 +55,9 @@
     <Compile Include="SyntaxicScopeTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\License.licenseheader">
+      <Link>License.licenseheader</Link>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
