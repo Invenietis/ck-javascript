@@ -223,7 +223,7 @@ namespace CK.Javascript
         public AccessorCallExpr( SourceLocation location, Expr left, IReadOnlyList<Expr> arguments = null )
             : base( location, left )
         {
-            _args = arguments ?? ReadOnlyListEmpty<Expr>.Empty;
+            _args = arguments ?? CKReadOnlyListEmpty<Expr>.Empty;
         }
 
         public override IReadOnlyList<Expr> CallArguments { get { return _args; } }
