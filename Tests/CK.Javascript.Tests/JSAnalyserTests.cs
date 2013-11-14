@@ -1,4 +1,25 @@
-﻿using System;
+﻿#region LGPL License
+/* ----------------------------------------------------------------------------
+*  This file (JSAnalyserTests.cs) is part of CK-Javascript. 
+*   
+*  CK-Javascript is free software: you can redistribute it and/or modify 
+*  it under the terms of the GNU Lesser General Public License as published 
+*  by the Free Software Foundation, either version 3 of the License, or 
+*  (at your option) any later version. 
+*   
+*  CK-Javascript is distributed in the hope that it will be useful, 
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+*  GNU Lesser General Public License for more details. 
+*  You should have received a copy of the GNU Lesser General Public License 
+*  along with CK-Javascript.  If not, see <http://www.gnu.org/licenses/>. 
+*   
+*  Copyright © 2013, 
+*      Invenietis <http://www.invenietis.com>
+*  All rights reserved. 
+* -----------------------------------------------------------------------------*/
+#endregion
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +36,7 @@ namespace CK.MultiPlan.Tests.Language
         public void EmptyParsing()
         {
             ExprAnalyser a = new ExprAnalyser( new StaticSyntaxicScope() );
-            JSParser p = new JSParser();
+            JSTokeniser p = new JSTokeniser();
             {
                 p.Reset( "" );
                 Assert.That( p.IsEndOfInput );
@@ -34,57 +55,57 @@ namespace CK.MultiPlan.Tests.Language
         public void BadNumbers()
         {
             ExprAnalyser a = new ExprAnalyser( new StaticSyntaxicScope() );
-            JSParser p = new JSParser();
+            JSTokeniser p = new JSTokeniser();
 
             {
                 p.Reset( "45DD" );
                 Assert.That( p.IsErrorOrEndOfInput, Is.True );
-                Assert.That( p.ErrorCode, Is.EqualTo( JSParserError.ErrorNumberIdentifierStartsImmediately ) );
+                Assert.That( p.ErrorCode, Is.EqualTo( JSTokeniserError.ErrorNumberIdentifierStartsImmediately ) );
             }
             {
                 p.Reset( "45.member" );
                 Assert.That( p.IsErrorOrEndOfInput, Is.True );
-                Assert.That( p.ErrorCode, Is.EqualTo( JSParserError.ErrorNumberIdentifierStartsImmediately ) );
+                Assert.That( p.ErrorCode, Is.EqualTo( JSTokeniserError.ErrorNumberIdentifierStartsImmediately ) );
             }
             {
                 p.Reset( ".45.member" );
                 Assert.That( p.IsErrorOrEndOfInput, Is.True );
-                Assert.That( p.ErrorCode, Is.EqualTo( JSParserError.ErrorNumberIdentifierStartsImmediately ) );
+                Assert.That( p.ErrorCode, Is.EqualTo( JSTokeniserError.ErrorNumberIdentifierStartsImmediately ) );
             }
             {
                 p.Reset( "45.01member" );
                 Assert.That( p.IsErrorOrEndOfInput, Is.True );
-                Assert.That( p.ErrorCode, Is.EqualTo( JSParserError.ErrorNumberIdentifierStartsImmediately ) );
+                Assert.That( p.ErrorCode, Is.EqualTo( JSTokeniserError.ErrorNumberIdentifierStartsImmediately ) );
             }
             {
                 p.Reset( ".45.member" );
                 Assert.That( p.IsErrorOrEndOfInput, Is.True );
-                Assert.That( p.ErrorCode, Is.EqualTo( JSParserError.ErrorNumberIdentifierStartsImmediately ) );
+                Assert.That( p.ErrorCode, Is.EqualTo( JSTokeniserError.ErrorNumberIdentifierStartsImmediately ) );
             }
             {
                 p.Reset( ".45.01member" );
                 Assert.That( p.IsErrorOrEndOfInput, Is.True );
-                Assert.That( p.ErrorCode, Is.EqualTo( JSParserError.ErrorNumberIdentifierStartsImmediately ) );
+                Assert.That( p.ErrorCode, Is.EqualTo( JSTokeniserError.ErrorNumberIdentifierStartsImmediately ) );
             }
             {
                 p.Reset( "45.01e23member" );
                 Assert.That( p.IsErrorOrEndOfInput, Is.True );
-                Assert.That( p.ErrorCode, Is.EqualTo( JSParserError.ErrorNumberIdentifierStartsImmediately ) );
+                Assert.That( p.ErrorCode, Is.EqualTo( JSTokeniserError.ErrorNumberIdentifierStartsImmediately ) );
             }
         }
 
         [Test]
         public void RoundtripParsing()
         {
-            JSParser p = new JSParser();
-            Assert.That( JSParser.Explain( JSParserToken.Integer ), Is.EqualTo( "42" ) );
+            JSTokeniser p = new JSTokeniser();
+            Assert.That( JSTokeniser.Explain( JSTokeniserToken.Integer ), Is.EqualTo( "42" ) );
 
             string s = " function ( x , z ) { if ( x != z || x && z % x - x >>> z >> z << x | z & x ^ z -- = x ++ ) return x + ( z * 42 ) / 42 ; } void == typeof += new -= delete >>= instanceof >>>= x % z %= x === z !== x ! z ~= x |= z &= x <<= z ^= x /= z *= x %=";
             p.Reset( s );
             string recompose = "";
             while( !p.IsEndOfInput )
             {
-                recompose += " " + JSParser.Explain( p.CurrentToken );
+                recompose += " " + JSTokeniser.Explain( p.CurrentToken );
                 p.Forward();
             }
             s = s.Replace( "if", "identifier" )
@@ -100,7 +121,7 @@ namespace CK.MultiPlan.Tests.Language
         public void SimpleExpression()
         {
             ExprAnalyser a = new ExprAnalyser( new StaticSyntaxicScope() );
-            JSParser p = new JSParser();
+            JSTokeniser p = new JSTokeniser();
 
             {
                 p.Reset( "value" );
@@ -115,7 +136,7 @@ namespace CK.MultiPlan.Tests.Language
                 Expr e = a.Analyse( p );
                 Assert.That( e is UnaryExpr );
                 UnaryExpr u = e as UnaryExpr;
-                Assert.That( u.TokenType == JSParserToken.Not );
+                Assert.That( u.TokenType == JSTokeniserToken.Not );
                 Assert.That( u.Expression is SyntaxErrorExpr );
                 Assert.That( SyntaxErrorCollector.Collect( e, null ).Count == 1 );
             }
@@ -124,7 +145,7 @@ namespace CK.MultiPlan.Tests.Language
                 Expr e = a.Analyse( p );
                 Assert.That( e is UnaryExpr );
                 UnaryExpr u = e as UnaryExpr;
-                Assert.That( u.TokenType == JSParserToken.Not );
+                Assert.That( u.TokenType == JSTokeniserToken.Not );
                 Assert.That( u.Expression is AccessorExpr );
                 Assert.That( SyntaxErrorCollector.Collect( e, Util.ActionVoid ).Count == 0 );
             }
@@ -133,11 +154,11 @@ namespace CK.MultiPlan.Tests.Language
                 Expr e = a.Analyse( p );
                 Assert.That( e is BinaryExpr );
                 BinaryExpr and = e as BinaryExpr;
-                Assert.That( and.BinaryOperatorToken == JSParserToken.And );
+                Assert.That( and.BinaryOperatorToken == JSTokeniserToken.And );
                 IsConstant( and.Left, 0.12e43 );
                 Assert.That( and.Right is UnaryExpr );
                 UnaryExpr u = and.Right as UnaryExpr;
-                Assert.That( u.TokenType == JSParserToken.BitwiseNot );
+                Assert.That( u.TokenType == JSTokeniserToken.BitwiseNot );
                 Assert.That( u.Expression is AccessorExpr );
 
                 Assert.That( SyntaxErrorCollector.Collect( e, Util.ActionVoid ).Count == 0 );
@@ -147,11 +168,11 @@ namespace CK.MultiPlan.Tests.Language
                 Expr e = a.Analyse( p );
                 Assert.That( e is BinaryExpr );
                 BinaryExpr or = e as BinaryExpr;
-                Assert.That( or.BinaryOperatorToken == JSParserToken.Or );
+                Assert.That( or.BinaryOperatorToken == JSTokeniserToken.Or );
                 Assert.That( or.Left is UnaryExpr );
                 Assert.That( or.Right is UnaryExpr );
                 UnaryExpr u = or.Right as UnaryExpr;
-                Assert.That( u.TokenType == JSParserToken.BitwiseNot );
+                Assert.That( u.TokenType == JSTokeniserToken.BitwiseNot );
                 IsConstant( u.Expression, "x" );
 
                 Assert.That( SyntaxErrorCollector.Collect( e, Util.ActionVoid ).Count == 0 );
@@ -169,7 +190,7 @@ namespace CK.MultiPlan.Tests.Language
                 IsConstant( b.Left, 3 );
                 Assert.That( b.Right is UnaryExpr );
                 UnaryExpr u = b.Right as UnaryExpr;
-                Assert.That( u.TokenType == JSParserToken.TypeOf );
+                Assert.That( u.TokenType == JSTokeniserToken.TypeOf );
                 IsConstant( u.Expression, "x" );
 
                 Assert.That( SyntaxErrorCollector.Collect( e, Util.ActionVoid ).Count == 0 );

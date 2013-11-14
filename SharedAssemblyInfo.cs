@@ -1,6 +1,6 @@
-ï»¿#region LGPL License
+#region LGPL License
 /* ----------------------------------------------------------------------------
-*  This file (IEvalVisitor.cs) is part of CK-Javascript. 
+*  This file (AssemblyInfo.cs) is part of CK-Javascript. 
 *   
 *  CK-Javascript is free software: you can redistribute it and/or modify 
 *  it under the terms of the GNU Lesser General Public License as published 
@@ -14,25 +14,25 @@
 *  You should have received a copy of the GNU Lesser General Public License 
 *  along with CK-Javascript.  If not, see <http://www.gnu.org/licenses/>. 
 *   
-*  Copyright Â© 2013, 
+*  Copyright © 2013, 
 *      Invenietis <http://www.invenietis.com>
 *  All rights reserved. 
 * -----------------------------------------------------------------------------*/
 #endregion
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Reflection;
 
-namespace CK.Javascript
-{
-    public  interface IEvalVisitor : IExprVisitor<Expr>
-    {
-        GlobalContext Global { get; }
+[assembly: AssemblyProduct("CK.Javascript")]
+[assembly: AssemblyCompany("Invenietis")]
+[assembly: AssemblyCopyright("Copyright © Invenietis 2013")]
+[assembly: AssemblyTrademark("")]
 
-        RuntimeObj Current { get; }
-        
-        RuntimeError CurrentError { get; }
-    }
+[assembly: AssemblyVersion("1.0.0")]
+[assembly: AssemblyFileVersion("1.0.0")]
 
-}
+#if DEBUG
+    [assembly: AssemblyConfiguration("Debug")]
+#else
+    [assembly: AssemblyConfiguration("Release")]
+#endif

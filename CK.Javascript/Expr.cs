@@ -1,4 +1,25 @@
-﻿using System;
+﻿#region LGPL License
+/* ----------------------------------------------------------------------------
+*  This file (Expr.cs) is part of CK-Javascript. 
+*   
+*  CK-Javascript is free software: you can redistribute it and/or modify 
+*  it under the terms of the GNU Lesser General Public License as published 
+*  by the Free Software Foundation, either version 3 of the License, or 
+*  (at your option) any later version. 
+*   
+*  CK-Javascript is distributed in the hope that it will be useful, 
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+*  GNU Lesser General Public License for more details. 
+*  You should have received a copy of the GNU Lesser General Public License 
+*  along with CK-Javascript.  If not, see <http://www.gnu.org/licenses/>. 
+*   
+*  Copyright © 2013, 
+*      Invenietis <http://www.invenietis.com>
+*  All rights reserved. 
+* -----------------------------------------------------------------------------*/
+#endregion
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -57,14 +78,14 @@ namespace CK.Javascript
 
     public class UnaryExpr : Expr
     {
-        public UnaryExpr( SourceLocation location, JSParserToken type, Expr e )
+        public UnaryExpr( SourceLocation location, JSTokeniserToken type, Expr e )
             : base( location )
         {
             TokenType = type;
             Expression = e;
         }
 
-        public JSParserToken TokenType { get; private set; }
+        public JSTokeniserToken TokenType { get; private set; }
 
         public Expr Expression { get; private set; }
 
@@ -76,7 +97,7 @@ namespace CK.Javascript
 
         public override string ToString()
         {
-            return JSParser.Explain( TokenType ) + Expression.ToString();
+            return JSTokeniser.Explain( TokenType ) + Expression.ToString();
         }
     }
 
@@ -202,7 +223,7 @@ namespace CK.Javascript
         public AccessorCallExpr( SourceLocation location, Expr left, IReadOnlyList<Expr> arguments = null )
             : base( location, left )
         {
-            _args = arguments ?? ReadOnlyListEmpty<Expr>.Empty;
+            _args = arguments ?? CKReadOnlyListEmpty<Expr>.Empty;
         }
 
         public override IReadOnlyList<Expr> CallArguments { get { return _args; } }
@@ -231,7 +252,7 @@ namespace CK.Javascript
 
     public class BinaryExpr : Expr
     {
-        public BinaryExpr( SourceLocation location, Expr left, JSParserToken binaryOperatorToken, Expr right )
+        public BinaryExpr( SourceLocation location, Expr left, JSTokeniserToken binaryOperatorToken, Expr right )
             : base( location )
         {
             Left = left;
@@ -241,7 +262,7 @@ namespace CK.Javascript
 
         public Expr Left { get; private set; }
 
-        public JSParserToken BinaryOperatorToken { get; private set; }
+        public JSTokeniserToken BinaryOperatorToken { get; private set; }
 
         public Expr Right { get; private set; }
 
@@ -253,7 +274,7 @@ namespace CK.Javascript
 
         public override string ToString()
         {
-            return Left.ToString() + JSParser.Explain( BinaryOperatorToken ) + Right.ToString();
+            return Left.ToString() + JSTokeniser.Explain( BinaryOperatorToken ) + Right.ToString();
         }
     }
 

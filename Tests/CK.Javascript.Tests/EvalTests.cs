@@ -1,4 +1,25 @@
-﻿using System;
+﻿#region LGPL License
+/* ----------------------------------------------------------------------------
+*  This file (EvalTests.cs) is part of CK-Javascript. 
+*   
+*  CK-Javascript is free software: you can redistribute it and/or modify 
+*  it under the terms of the GNU Lesser General Public License as published 
+*  by the Free Software Foundation, either version 3 of the License, or 
+*  (at your option) any later version. 
+*   
+*  CK-Javascript is distributed in the hope that it will be useful, 
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+*  GNU Lesser General Public License for more details. 
+*  You should have received a copy of the GNU Lesser General Public License 
+*  along with CK-Javascript.  If not, see <http://www.gnu.org/licenses/>. 
+*   
+*  Copyright © 2013, 
+*      Invenietis <http://www.invenietis.com>
+*  All rights reserved. 
+* -----------------------------------------------------------------------------*/
+#endregion
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,6 +39,10 @@ namespace CK.MultiPlan.Tests.Language
                 o = Eval( "6" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( 6 ) );
+            }
+            {
+                o = Eval( "6+++8" );
+                Assert.That( o is RuntimeError );
             }
             {
                 o = Eval( "(6+6)*3/4*2" );
@@ -251,7 +276,7 @@ namespace CK.MultiPlan.Tests.Language
 
         static RuntimeObj Eval( string s )
         {
-            JSParser p = new JSParser();
+            JSTokeniser p = new JSTokeniser();
             p.Reset( s );
             ExprAnalyser a = new ExprAnalyser( new StaticSyntaxicScope() );
             Expr e = a.Analyse( p );

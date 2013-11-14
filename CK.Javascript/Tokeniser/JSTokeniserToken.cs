@@ -1,4 +1,25 @@
-﻿using System;
+﻿#region LGPL License
+/* ----------------------------------------------------------------------------
+*  This file (JSTokeniserToken.cs) is part of CK-Javascript. 
+*   
+*  CK-Javascript is free software: you can redistribute it and/or modify 
+*  it under the terms of the GNU Lesser General Public License as published 
+*  by the Free Software Foundation, either version 3 of the License, or 
+*  (at your option) any later version. 
+*   
+*  CK-Javascript is distributed in the hope that it will be useful, 
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+*  GNU Lesser General Public License for more details. 
+*  You should have received a copy of the GNU Lesser General Public License 
+*  along with CK-Javascript.  If not, see <http://www.gnu.org/licenses/>. 
+*   
+*  Copyright © 2013, 
+*      Invenietis <http://www.invenietis.com>
+*  All rights reserved. 
+* -----------------------------------------------------------------------------*/
+#endregion
+using System;
 
 namespace CK.Javascript
 {
@@ -28,25 +49,25 @@ namespace CK.Javascript
     ///  1  ,                                       Multiple evaluation
     /// </remarks>
     [Flags]
-    public enum JSParserToken
+    public enum JSTokeniserToken
     {
         None = 0,
 
         #region JSParserError values bits n°31 to 26.
-        IsErrorOrEndOfInput = JSParserError.IsErrorOrEndOfInput,
-        EndOfInput = JSParserError.EndOfInput,
-        ErrorMask = JSParserError.ErrorMask,
-        ErrorInvalidChar = JSParserError.ErrorInvalidChar,
-        ErrorStringMask = JSParserError.ErrorStringMask,
-        ErrorNumberMask = JSParserError.ErrorNumberMask,
-        ErrorRegexMask = JSParserError.ErrorRegexMask,
-        ErrorStringUnterminated = JSParserError.ErrorStringUnterminated,
-        ErrorStringEmbeddedUnicodeValue = JSParserError.ErrorStringEmbeddedUnicodeValue,
-        ErrorStringEmbeddedHexaValue = JSParserError.ErrorStringEmbeddedHexaValue,
-        ErrorStringUnexpectedCRInLineContinuation = JSParserError.ErrorStringUnexpectedCRInLineContinuation,
-        ErrorNumberUnterminatedValue = JSParserError.ErrorNumberUnterminatedValue,
-        ErrorNumberValue = JSParserError.ErrorNumberValue,
-        ErrorRegexUnterminated = JSParserError.ErrorRegexUnterminated,
+        IsErrorOrEndOfInput = JSTokeniserError.IsErrorOrEndOfInput,
+        EndOfInput = JSTokeniserError.EndOfInput,
+        ErrorMask = JSTokeniserError.ErrorMask,
+        ErrorInvalidChar = JSTokeniserError.ErrorInvalidChar,
+        ErrorStringMask = JSTokeniserError.ErrorStringMask,
+        ErrorNumberMask = JSTokeniserError.ErrorNumberMask,
+        ErrorRegexMask = JSTokeniserError.ErrorRegexMask,
+        ErrorStringUnterminated = JSTokeniserError.ErrorStringUnterminated,
+        ErrorStringEmbeddedUnicodeValue = JSTokeniserError.ErrorStringEmbeddedUnicodeValue,
+        ErrorStringEmbeddedHexaValue = JSTokeniserError.ErrorStringEmbeddedHexaValue,
+        ErrorStringUnexpectedCRInLineContinuation = JSTokeniserError.ErrorStringUnexpectedCRInLineContinuation,
+        ErrorNumberUnterminatedValue = JSTokeniserError.ErrorNumberUnterminatedValue,
+        ErrorNumberValue = JSTokeniserError.ErrorNumberValue,
+        ErrorRegexUnterminated = JSTokeniserError.ErrorRegexUnterminated,
         #endregion
 
         #region Operator precedence bits n°25 to 21 (levels from 0 to 15).

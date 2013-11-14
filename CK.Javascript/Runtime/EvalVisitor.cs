@@ -1,4 +1,25 @@
-﻿using System;
+﻿#region LGPL License
+/* ----------------------------------------------------------------------------
+*  This file (EvalVisitor.cs) is part of CK-Javascript. 
+*   
+*  CK-Javascript is free software: you can redistribute it and/or modify 
+*  it under the terms of the GNU Lesser General Public License as published 
+*  by the Free Software Foundation, either version 3 of the License, or 
+*  (at your option) any later version. 
+*   
+*  CK-Javascript is distributed in the hope that it will be useful, 
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+*  GNU Lesser General Public License for more details. 
+*  You should have received a copy of the GNU Lesser General Public License 
+*  along with CK-Javascript.  If not, see <http://www.gnu.org/licenses/>. 
+*   
+*  Copyright © 2013, 
+*      Invenietis <http://www.invenietis.com>
+*  All rights reserved. 
+* -----------------------------------------------------------------------------*/
+#endregion
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -156,8 +177,8 @@ namespace CK.Javascript
                 if( HasError ) return e;
 
                 // Do not evaluate right expression if it is useless.
-                if( (e.BinaryOperatorToken == JSParserToken.And && !_current.ToBoolean())
-                    || (e.BinaryOperatorToken == JSParserToken.Or && _current.ToBoolean()) )
+                if( (e.BinaryOperatorToken == JSTokeniserToken.And && !_current.ToBoolean())
+                    || (e.BinaryOperatorToken == JSTokeniserToken.Or && _current.ToBoolean()) )
                 {
                     return e;
                 }
@@ -166,52 +187,52 @@ namespace CK.Javascript
                 if( HasError ) return e;
                 RuntimeObj right = _current;
 
-                if( e.BinaryOperatorToken == JSParserToken.And || e.BinaryOperatorToken == JSParserToken.Or )
+                if( e.BinaryOperatorToken == JSTokeniserToken.And || e.BinaryOperatorToken == JSTokeniserToken.Or )
                 {
                     _current = right;
                 }
-                else if( (e.BinaryOperatorToken & JSParserToken.IsCompareOperator) != 0 )
+                else if( (e.BinaryOperatorToken & JSTokeniserToken.IsCompareOperator) != 0 )
                 {
                     #region ==, <, >, <=, >=, !=, === and !==
                     int compareValue;
                     switch( (int)e.BinaryOperatorToken & 15 )
                     {
-                        case (int)JSParserToken.StrictEqual & 15:
+                        case (int)JSTokeniserToken.StrictEqual & 15:
                             {
                                 _current = _global.CreateBoolean( new RuntimeObjComparer( left, right ).AreEqualStrict( _global ) );
                                 break;
                             }
-                        case (int)JSParserToken.StrictDifferent & 15:
+                        case (int)JSTokeniserToken.StrictDifferent & 15:
                             {
                                 _current = _global.CreateBoolean( !new RuntimeObjComparer( left, right ).AreEqualStrict( _global ) );
                                 break;
                             }
-                        case (int)JSParserToken.Greater & 15:
+                        case (int)JSTokeniserToken.Greater & 15:
                             {
                                 _current = _global.CreateBoolean( new RuntimeObjComparer( left, right ).Compare( _global, out compareValue ) && compareValue > 0 );
                                 break;
                             }
-                        case (int)JSParserToken.GreaterOrEqual & 15:
+                        case (int)JSTokeniserToken.GreaterOrEqual & 15:
                             {
                                 _current = _global.CreateBoolean( new RuntimeObjComparer( left, right ).Compare( _global, out compareValue ) && compareValue >= 0 );
                                 break;
                             }
-                        case (int)JSParserToken.Less & 15:
+                        case (int)JSTokeniserToken.Less & 15:
                             {
                                 _current = _global.CreateBoolean( new RuntimeObjComparer( left, right ).Compare( _global, out compareValue ) && compareValue < 0 );
                                 break;
                             }
-                        case (int)JSParserToken.LessOrEqual & 15:
+                        case (int)JSTokeniserToken.LessOrEqual & 15:
                             {
                                 _current = _global.CreateBoolean( new RuntimeObjComparer( left, right ).Compare( _global, out compareValue ) && compareValue <= 0 );
                                 break;
                             }
-                        case (int)JSParserToken.Equal & 15:
+                        case (int)JSTokeniserToken.Equal & 15:
                             {
                                 _current = _global.CreateBoolean( new RuntimeObjComparer( left, right ).AreEqual( _global ) );
                                 break;
                             }
-                        case (int)JSParserToken.Different & 15:
+                        case (int)JSTokeniserToken.Different & 15:
                             {
                                 _current = _global.CreateBoolean( !new RuntimeObjComparer( left, right ).AreEqual( _global ) );
                                 break;
@@ -220,12 +241,12 @@ namespace CK.Javascript
                     }
                     #endregion
                 }
-                else if( (e.BinaryOperatorToken & JSParserToken.IsBinaryOperator) != 0 )
+                else if( (e.BinaryOperatorToken & JSTokeniserToken.IsBinaryOperator) != 0 )
                 {
                     #region |, ^, &, >>, <<, >>>, +, -, /, * and %.
                     switch( (int)e.BinaryOperatorToken & 15 )
                     {
-                        case (int)JSParserToken.Plus & 15:
+                        case (int)JSTokeniserToken.Plus & 15:
                             {
                                 RuntimeObj l = left.ToPrimitive( _global );
                                 RuntimeObj r = right.ToPrimitive( _global );
@@ -240,22 +261,22 @@ namespace CK.Javascript
                                 }
                                 break;
                             }
-                        case (int)JSParserToken.Minus & 15:
+                        case (int)JSTokeniserToken.Minus & 15:
                             {
                                 _current = _global.CreateNumber( left.ToDouble() - right.ToDouble() );
                                 break;
                             }
-                        case (int)JSParserToken.Mult & 15:
+                        case (int)JSTokeniserToken.Mult & 15:
                             {
                                 _current = _global.CreateNumber( left.ToDouble() * right.ToDouble() );
                                 break;
                             }
-                        case (int)JSParserToken.Divide & 15:
+                        case (int)JSTokeniserToken.Divide & 15:
                             {
                                 _current = _global.CreateNumber( left.ToDouble() / right.ToDouble() );
                                 break;
                             }
-                        case (int)JSParserToken.Modulo & 15:
+                        case (int)JSTokeniserToken.Modulo & 15:
                             {
                                 if( right == _global.Zero || left == _global.NegativeInfinity || left == _global.Infinity )
                                 {
@@ -271,38 +292,38 @@ namespace CK.Javascript
                                 }
                                 break;
                             }
-                        case (int)JSParserToken.BitwiseAnd & 15:
+                        case (int)JSTokeniserToken.BitwiseAnd & 15:
                             {
                                 Int64 l = JSSupport.ToInt64( left.ToDouble() );
                                 Int64 r = JSSupport.ToInt64( right.ToDouble() );
                                 _current = _global.CreateNumber( l & r );
                                 break;
                             }
-                        case (int)JSParserToken.BitwiseOr & 15:
+                        case (int)JSTokeniserToken.BitwiseOr & 15:
                             {
                                 Int64 l = JSSupport.ToInt64( left.ToDouble() );
                                 Int64 r = JSSupport.ToInt64( right.ToDouble() );
                                 _current = _global.CreateNumber( l | r );
                                 break;
                             }
-                        case (int)JSParserToken.BitwiseXOr & 15:
+                        case (int)JSTokeniserToken.BitwiseXOr & 15:
                             {
                                 Int64 l = JSSupport.ToInt64( left.ToDouble() );
                                 Int64 r = JSSupport.ToInt64( right.ToDouble() );
                                 _current = _global.CreateNumber( l ^ r );
                                 break;
                             }
-                        case (int)JSParserToken.BitwiseShiftLeft & 15:
+                        case (int)JSTokeniserToken.BitwiseShiftLeft & 15:
                             {
                                 BitwiseShift( left, right, ( i, shift ) => i << shift );
                                 break;
                             }
-                        case (int)JSParserToken.BitwiseShiftRight & 15:
+                        case (int)JSTokeniserToken.BitwiseShiftRight & 15:
                             {
                                 BitwiseShift( left, right, ( i, shift ) => i >> shift );
                                 break;
                             }
-                        case (int)JSParserToken.BitwiseShiftRightNoSignBit & 15:
+                        case (int)JSTokeniserToken.BitwiseShiftRightNoSignBit & 15:
                             {
                                 BitwiseShift( left, right, ( i, shift ) => (long)((ulong)i >> shift) );
                                 break;
@@ -311,7 +332,7 @@ namespace CK.Javascript
                     }
                     #endregion
                 }
-                else throw new NotSupportedException( "Unsupported binary operator: " + JSParser.Explain( e.BinaryOperatorToken ) );
+                else throw new NotSupportedException( "Unsupported binary operator: " + JSTokeniser.Explain( e.BinaryOperatorToken ) );
             }
             return e;
         }
@@ -379,11 +400,11 @@ namespace CK.Javascript
 
                 // Minus and Plus are classified as a binary operator.
                 // Handle thoss special cases here.
-                if( e.TokenType == JSParserToken.Minus )
+                if( e.TokenType == JSTokeniserToken.Minus )
                 {
                     _current = _global.CreateNumber( -_current.ToDouble() );
                 }
-                else if( e.TokenType == JSParserToken.Plus )
+                else if( e.TokenType == JSTokeniserToken.Plus )
                 {
                     _current = _global.CreateNumber( _current.ToDouble() );
                 }
@@ -391,24 +412,24 @@ namespace CK.Javascript
                 {
                     switch( (int)e.TokenType & 15 )
                     {
-                        case (int)JSParserToken.Not & 15:
+                        case (int)JSTokeniserToken.Not & 15:
                             {
                                 _current = _global.CreateBoolean( !_current.ToBoolean() );
                                 break;
                             }
-                        case (int)JSParserToken.BitwiseNot & 15:
+                        case (int)JSTokeniserToken.BitwiseNot & 15:
                             {
                                 _current = _global.CreateNumber( ~JSSupport.ToInt64( _current.ToDouble() ) );
                                 break;
                             }
-                        case (int)JSParserToken.TypeOf & 15:
+                        case (int)JSTokeniserToken.TypeOf & 15:
                             {
                                 // Well known Javascript bug: typeof null === "object".
                                 if( _current == RuntimeObj.Null ) _current = _global.CreateString( RuntimeObj.TypeObject );
                                 else _current = _global.CreateString( _current.Type );
                                 break;
                             }
-                        case (int)JSParserToken.Void & 15:
+                        case (int)JSTokeniserToken.Void & 15:
                             {
                                 _current = RuntimeObj.Undefined; 
                                 break;

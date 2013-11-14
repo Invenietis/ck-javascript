@@ -1,6 +1,6 @@
 ﻿#region LGPL License
 /* ----------------------------------------------------------------------------
-*  This file (SyntaxErrorCollector.cs) is part of CK-Javascript. 
+*  This file (SourceLocation.cs) is part of CK-Javascript. 
 *   
 *  CK-Javascript is free software: you can redistribute it and/or modify 
 *  it under the terms of the GNU Lesser General Public License as published 
@@ -27,39 +27,34 @@ using CK.Core;
 
 namespace CK.Javascript
 {
-    public class SyntaxErrorCollector : ExprVisitor
+    public struct SourceLocation
     {
-        Action<SyntaxErrorExpr> _collector;
-        Action<AccessorExpr> _unboundCollector;
+        public const string NoSource = "(no source)";
 
-        public SyntaxErrorCollector( Action<SyntaxErrorExpr> collector, Action<AccessorExpr> unboundCollector = null )
+        public static readonly SourceLocation Empty = new SourceLocation() { Source = NoSource };
+
+        public string Source;
+        public int Line;
+        public int Column;
+
+        public override int GetHashCode()
         {
-            if( collector == null ) throw new ArgumentNullException( "collector" );
-            _collector = collector;
-            _unboundCollector = unboundCollector;
+            return Util.Hash.Combine( Util.Hash.StartValue, Source, Line, Column ).GetHashCode();
         }
 
-        static public IReadOnlyList<SyntaxErrorExpr> Collect( Expr e, Action<AccessorExpr> unboundCollector = null )
+        public override bool Equals( object obj )
         {
-            List<SyntaxErrorExpr> collector = new List<SyntaxErrorExpr>();
-            new SyntaxErrorCollector( collector.Add, unboundCollector ).VisitExpr( e );
-            return collector.ToReadOnlyList();
-        }
-
-        public override Expr Visit( AccessorMemberExpr e )
-        {
-            if( _unboundCollector != null )
+            if( obj is SourceLocation )
             {
-                if( e.IsUnbound ) _unboundCollector( e );
-                else VisitExpr( e.Left );
+                SourceLocation other = (SourceLocation)obj;
+                return Line == other.Line && Column == other.Column && Source == other.Source;
             }
-            return e;
+            return false;
         }
 
-        public override Expr Visit( SyntaxErrorExpr e )
+        public override string ToString()
         {
-            _collector( e );
-            return e;
+            return String.Format( "{0} - line {1}, column {2}", Source, Line, Column );
         }
     }
 }
