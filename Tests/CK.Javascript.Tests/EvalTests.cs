@@ -222,6 +222,12 @@ namespace CK.MultiPlan.Tests.Language
         }
 
         [Test]
+        public void TestCKReadOnly()
+        {
+
+        }
+
+        [Test]
         public void CallFunc()
         {
             IsBoolean( "(400+50+3).toString() === '453'", true );
