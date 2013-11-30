@@ -129,7 +129,7 @@ namespace CK.Javascript
                     }
                 }
             }
-            var arguments = parameters != null ? parameters.ToReadOnlyList() : ReadOnlyListEmpty<Expr>.Empty;
+            var arguments = parameters != null ? parameters.ToReadOnlyList() : CKReadOnlyListEmpty<Expr>.Empty;
             return new AccessorCallExpr( loc, left, arguments );
         }
 

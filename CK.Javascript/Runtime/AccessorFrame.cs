@@ -62,7 +62,7 @@ namespace CK.Javascript
             var args = Expr.CallArguments;
             if( args != null )
             {
-                if( args.Count == 0 || maxParameterCount == 0 ) return ReadOnlyListEmpty<RuntimeObj>.Empty;
+                if( args.Count == 0 || maxParameterCount == 0 ) return CKReadOnlyListEmpty<RuntimeObj>.Empty;
                 if( maxParameterCount < 0 ) maxParameterCount = args.Count;
                 else maxParameterCount = Math.Min( maxParameterCount, args.Count );
                 RuntimeObj[] results = new RuntimeObj[ maxParameterCount ];
