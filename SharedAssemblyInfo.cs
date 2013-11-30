@@ -28,8 +28,8 @@ using System.Reflection;
 [assembly: AssemblyCopyright("Copyright © Invenietis 2013")]
 [assembly: AssemblyTrademark("")]
 
-[assembly: AssemblyVersion("1.0.1")]
-[assembly: AssemblyFileVersion("1.0.1")]
+[assembly: AssemblyVersion("1.0.2")]
+[assembly: AssemblyFileVersion("1.0.2")]
 
 #if DEBUG
     [assembly: AssemblyConfiguration("Debug")]
