@@ -43,8 +43,9 @@
     <AssemblyOriginatorKeyFile>..\SharedKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CK.Core">
-      <HintPath>..\packages\CK.Core.2.8.14\lib\net45\CK.Core.dll</HintPath>
+    <Reference Include="CK.Core, Version=3.0.15.0, Culture=neutral, PublicKeyToken=731c291b31fb8d27, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\CK.Core.3.0.15-develop\lib\net45\CK.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
