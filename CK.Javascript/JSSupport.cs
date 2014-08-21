@@ -91,7 +91,7 @@ namespace CK.Javascript
 
         /// <summary>
         /// Converts a double into an int, projecting any out of range values to 0 (<see cref="Double.NaN"/> is always mapped to 0).
-        /// Can optionaly map values exceeding [<see cref="Int32.MinValue"/>,<see cref="Int32.MaxValue"/>] to the closest min/max.
+        /// Can optionally map values exceeding [<see cref="Int32.MinValue"/>,<see cref="Int32.MaxValue"/>] to the closest min/max.
         /// </summary>
         /// <param name="d">Double to convert.</param>
         /// <param name="toMinMax">True to map values exceeding [<see cref="Int32.MinValue"/>,<see cref="Int32.MaxValue"/>] to the closest min/max.</param>
@@ -106,7 +106,7 @@ namespace CK.Javascript
 
         /// <summary>
         /// Converts a double into a long, projecting any out of range values to 0 (<see cref="Double.NaN"/> is always mapped to 0).
-        /// Can optionaly map values exceeding [<see cref="Int64.MinValue"/>,<see cref="Int64.MaxValue"/>] to the closest min/max.
+        /// Can optionally map values exceeding [<see cref="Int64.MinValue"/>,<see cref="Int64.MaxValue"/>] to the closest min/max.
         /// </summary>
         /// <param name="d">Double to convert.</param>
         /// <param name="toMinMax">True to map values exceeding [<see cref="Int64.MinValue"/>,<see cref="Int64.MaxValue"/>] to the closest min/max.</param>
@@ -122,7 +122,7 @@ namespace CK.Javascript
         /// <summary>
         /// Handles "Infinity" and "-Infinity". The string may contains leading and/or trailing white spaces and a leading negative sign.
         /// When <see cref="String.IsNullOrWhiteSpace"/> the result is 0 by default (it is <see cref="Double.NaN"/> for <see cref="ParseFloat"/>). 
-        /// Non parsable numbers (or "NaN" itself) are returned as <see cref="Double.NaN"/>.
+        /// Non parse-able numbers (or "NaN" itself) are returned as <see cref="Double.NaN"/>.
         /// </summary>
         /// <param name="s">String to convert.</param>
         /// <param name="whenNullOrWhitespace">Defaults to 0.</param>
@@ -141,7 +141,7 @@ namespace CK.Javascript
         /// <summary>
         /// Handles "Infinity" and "-Infinity". The string may contains leading and/or trailing white spaces and a leading negative sign.
         /// When <see cref="String.IsNullOrWhiteSpace"/> the result is <see cref="Double.NaN"/>. 
-        /// Non parsable numbers (or "NaN" itself) are returned as <see cref="Double.NaN"/>.
+        /// Non parse-able numbers (or "NaN" itself) are returned as <see cref="Double.NaN"/>.
         /// </summary>
         /// <param name="s">String to convert.</param>
         /// <returns>The double, following javascript parseFloat rules.</returns>
