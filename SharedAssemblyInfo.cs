@@ -14,7 +14,7 @@
 *  You should have received a copy of the GNU Lesser General Public License 
 *  along with CK-Javascript.  If not, see <http://www.gnu.org/licenses/>. 
 *   
-*  Copyright © 2013, 
+*  Copyright ï¿½ 2013, 
 *      Invenietis <http://www.invenietis.com>
 *  All rights reserved. 
 * -----------------------------------------------------------------------------*/
@@ -25,14 +25,17 @@ using System.Reflection;
 
 [assembly: AssemblyProduct("CK.Javascript")]
 [assembly: AssemblyCompany("Invenietis")]
-[assembly: AssemblyCopyright("Copyright © Invenietis 2014")]
+[assembly: AssemblyCopyright("Copyright ï¿½ Invenietis 2014")]
 [assembly: AssemblyTrademark("")]
 
-[assembly: AssemblyVersion("1.0.6")]
-[assembly: AssemblyFileVersion("1.0.6")]
+[assembly: AssemblyVersion("1.1.0")]
+
 
 #if DEBUG
     [assembly: AssemblyConfiguration("Debug")]
 #else
     [assembly: AssemblyConfiguration("Release")]
 #endif
+
+// Added by CKReleaser.
+[assembly: AssemblyInformationalVersion( "%semver% - %githash%" )]
