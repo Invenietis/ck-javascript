@@ -1,6 +1,6 @@
 #region LGPL License
 /*----------------------------------------------------------------------------
-* This file (CK.Javascript\IExprVisitor.cs) is part of CiviKey. 
+* This file (CK.Javascript\EvalVisitor\IEvalVisitor.cs) is part of CiviKey. 
 *  
 * CiviKey is free software: you can redistribute it and/or modify 
 * it under the terms of the GNU Lesser General Public License as published 
@@ -22,24 +22,35 @@
 #endregion
 
 using System;
-using CK.Core;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace CK.Javascript
 {
+
     /// <summary>
-    /// Basic visitor contract: it is parametrized with the returned type of the visit methods.
+    /// A <see cref="IExprVisitor{T}"/> where T is a <see cref="Expr"/> that is bound to a <see cref="GlobalContext"/>
+    /// and exposes a <see cref="Current"/> evaluation result object and/or a <see cref="CurrentError"/>.
     /// </summary>
-    /// <typeparam name="T">Type of the returned value of the visit methods.</typeparam>
-    public interface IExprVisitor<out T>
+    public interface IEvalVisitor : IExprVisitor<Expr>
     {
-        T VisitExpr( Expr e );
-        T Visit( AccessorMemberExpr e );
-        T Visit( AccessorIndexerExpr e );
-        T Visit( AccessorCallExpr e );
-        T Visit( BinaryExpr e );
-        T Visit( ConstantExpr e );
-        T Visit( IfExpr e );
-        T Visit( SyntaxErrorExpr e );
-        T Visit( UnaryExpr e );
+        /// <summary>
+        /// Gets the <see cref="GlobalContext"/> that will be used to obtain primitive 
+        /// objects (<see cref="RuntimeObj)"/> and resolve unbound accessors.
+        /// </summary>
+        GlobalContext Global { get; }
+
+        /// <summary>
+        /// Current evaluation result.
+        /// </summary>
+        RuntimeObj Current { get; }
+        
+        /// <summary>
+        /// Current error (null if no error occured).
+        /// </summary>
+        RuntimeError CurrentError { get; }
+
     }
+
 }

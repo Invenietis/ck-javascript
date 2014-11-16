@@ -1,24 +1,26 @@
-﻿#region LGPL License
-/* ----------------------------------------------------------------------------
-*  This file (EvalVisitor.cs) is part of CK-Javascript. 
-*   
-*  CK-Javascript is free software: you can redistribute it and/or modify 
-*  it under the terms of the GNU Lesser General Public License as published 
-*  by the Free Software Foundation, either version 3 of the License, or 
-*  (at your option) any later version. 
-*   
-*  CK-Javascript is distributed in the hope that it will be useful, 
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-*  GNU Lesser General Public License for more details. 
-*  You should have received a copy of the GNU Lesser General Public License 
-*  along with CK-Javascript.  If not, see <http://www.gnu.org/licenses/>. 
-*   
-*  Copyright © 2013, 
-*      Invenietis <http://www.invenietis.com>
-*  All rights reserved. 
-* -----------------------------------------------------------------------------*/
+#region LGPL License
+/*----------------------------------------------------------------------------
+* This file (CK.Javascript\EvalVisitor\EvalVisitor.cs) is part of CiviKey. 
+*  
+* CiviKey is free software: you can redistribute it and/or modify 
+* it under the terms of the GNU Lesser General Public License as published 
+* by the Free Software Foundation, either version 3 of the License, or 
+* (at your option) any later version. 
+*  
+* CiviKey is distributed in the hope that it will be useful, 
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+* GNU Lesser General Public License for more details. 
+* You should have received a copy of the GNU Lesser General Public License 
+* along with CiviKey.  If not, see <http://www.gnu.org/licenses/>. 
+*  
+* Copyright © 2007-2014, 
+*     Invenietis <http://www.invenietis.com>,
+*     In’Tech INFO <http://www.intechinfo.fr>,
+* All rights reserved. 
+*-----------------------------------------------------------------------------*/
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,6 +92,20 @@ namespace CK.Javascript
             _global = context;
         }
 
+        /// <summary>
+        /// Evaluate a string.
+        /// </summary>
+        /// <param name="s">The string to evaluate.</param>
+        /// <param name="ctx">The <see cref="GlobalContext"/>. When null, a new GlobalContext is used.</param>
+        /// <returns>The result of the evaluation.</returns>
+        public static RuntimeObj Evaluate( string s, GlobalContext ctx = null )
+        {
+            Expr e = ExprAnalyser.AnalyseString( s );
+            EvalVisitor v = new EvalVisitor( ctx ?? new GlobalContext() );
+            v.VisitExpr( e );
+            return v.Current;
+        }
+
         public GlobalContext Global 
         {
             get { return _global; }
@@ -105,6 +121,7 @@ namespace CK.Javascript
             get { return _currentError; }
         }
 
+        [Obsolete( "Use HasError() extension method instead.", true )]
         public bool HasError
         {
             get { return _currentError != null; }
@@ -128,7 +145,7 @@ namespace CK.Javascript
         {
             using( var frame = EnterAccessorFrame( e ) )
             {
-                if( e.Left == SyntaxErrorExpr.ReferenceErrorExpr )
+                if( e.IsUnbound )
                 {
                     _global.Visit( this, frame );
                     if( !frame.HasResultOrError ) frame.SetAccessorError();
@@ -174,7 +191,7 @@ namespace CK.Javascript
             using( EnterVisitFrame( e ) )
             {
                 VisitExpr( e.Left );
-                if( HasError ) return e;
+                if( _currentError != null ) return e;
 
                 // Do not evaluate right expression if it is useless.
                 if( (e.BinaryOperatorToken == JSTokeniserToken.And && !_current.ToBoolean())
@@ -184,7 +201,7 @@ namespace CK.Javascript
                 }
                 RuntimeObj left = _current;
                 VisitExpr( e.Right );
-                if( HasError ) return e;
+                if( _currentError != null ) return e;
                 RuntimeObj right = _current;
 
                 if( e.BinaryOperatorToken == JSTokeniserToken.And || e.BinaryOperatorToken == JSTokeniserToken.Or )
@@ -377,7 +394,7 @@ namespace CK.Javascript
             using( EnterVisitFrame( e ) )
             {
                 VisitExpr( e.Condition );
-                if( HasError ) return e;
+                if( _currentError != null ) return e;
                 if( _current.ToBoolean() )
                 {
                     VisitExpr( e.WhenTrue );
@@ -396,7 +413,7 @@ namespace CK.Javascript
             using( EnterVisitFrame( e ) )
             {
                 VisitExpr( e.Expression );
-                if( HasError ) return e;
+                if( _currentError != null ) return e;
 
                 // Minus and Plus are classified as a binary operator.
                 // Handle thoss special cases here.

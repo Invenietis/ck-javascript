@@ -1,6 +1,6 @@
 #region LGPL License
 /*----------------------------------------------------------------------------
-* This file (CK.Javascript\IExprVisitor.cs) is part of CiviKey. 
+* This file (CK.Javascript\EvalVisitor\JSEvalBoolean.cs) is part of CiviKey. 
 *  
 * CiviKey is free software: you can redistribute it and/or modify 
 * it under the terms of the GNU Lesser General Public License as published 
@@ -22,24 +22,41 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using CK.Core;
 
 namespace CK.Javascript
 {
-    /// <summary>
-    /// Basic visitor contract: it is parametrized with the returned type of the visit methods.
-    /// </summary>
-    /// <typeparam name="T">Type of the returned value of the visit methods.</typeparam>
-    public interface IExprVisitor<out T>
+    public class JSEvalBoolean : RuntimeObj
     {
-        T VisitExpr( Expr e );
-        T Visit( AccessorMemberExpr e );
-        T Visit( AccessorIndexerExpr e );
-        T Visit( AccessorCallExpr e );
-        T Visit( BinaryExpr e );
-        T Visit( ConstantExpr e );
-        T Visit( IfExpr e );
-        T Visit( SyntaxErrorExpr e );
-        T Visit( UnaryExpr e );
+        bool _value;
+
+        public JSEvalBoolean( bool v )
+        {
+            _value = v;
+        }
+
+        public override string Type
+        {
+            get { return RuntimeObj.TypeBoolean; }
+        }
+
+        public override bool ToBoolean()
+        {
+            return _value;
+        }
+
+        public override double ToDouble()
+        {
+            return JSSupport.ToNumber( _value );
+        }
+
+        public override string ToString()
+        {
+            return JSSupport.ToString( _value );
+        }
+
     }
 }

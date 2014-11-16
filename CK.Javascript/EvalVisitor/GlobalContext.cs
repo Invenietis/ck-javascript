@@ -1,23 +1,24 @@
-﻿#region LGPL License
-/* ----------------------------------------------------------------------------
-*  This file (GlobalContext.cs) is part of CK-Javascript. 
-*   
-*  CK-Javascript is free software: you can redistribute it and/or modify 
-*  it under the terms of the GNU Lesser General Public License as published 
-*  by the Free Software Foundation, either version 3 of the License, or 
-*  (at your option) any later version. 
-*   
-*  CK-Javascript is distributed in the hope that it will be useful, 
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-*  GNU Lesser General Public License for more details. 
-*  You should have received a copy of the GNU Lesser General Public License 
-*  along with CK-Javascript.  If not, see <http://www.gnu.org/licenses/>. 
-*   
-*  Copyright © 2013, 
-*      Invenietis <http://www.invenietis.com>
-*  All rights reserved. 
-* -----------------------------------------------------------------------------*/
+#region LGPL License
+/*----------------------------------------------------------------------------
+* This file (CK.Javascript\EvalVisitor\GlobalContext.cs) is part of CiviKey. 
+*  
+* CiviKey is free software: you can redistribute it and/or modify 
+* it under the terms of the GNU Lesser General Public License as published 
+* by the Free Software Foundation, either version 3 of the License, or 
+* (at your option) any later version. 
+*  
+* CiviKey is distributed in the hope that it will be useful, 
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+* GNU Lesser General Public License for more details. 
+* You should have received a copy of the GNU Lesser General Public License 
+* along with CiviKey.  If not, see <http://www.gnu.org/licenses/>. 
+*  
+* Copyright © 2007-2014, 
+*     Invenietis <http://www.invenietis.com>,
+*     In’Tech INFO <http://www.intechinfo.fr>,
+* All rights reserved. 
+*-----------------------------------------------------------------------------*/
 #endregion
 
 using System;
@@ -162,6 +163,14 @@ namespace CK.Javascript
             return CreateRuntimeError( e, "Not a function.", previous );
         }
 
+        /// <summary>
+        /// Default implementation of <see cref="IAccessorVisitor.Visit"/> that supports evaluation of intrinsic 
+        /// functions Number(), String(), Boolean() and Date().
+        /// By overriding this any binding to to external objects can be achieved (recall to call this base
+        /// method when overriding).
+        /// </summary>
+        /// <param name="v">The vistitor.</param>
+        /// <param name="frame">The current frame (gives access to the next frame if any).</param>
         public virtual void Visit( IEvalVisitor v, IAccessorFrame frame )
         {
             CallFunctionDescriptor f = frame.MatchCall( "Number", 1 );
