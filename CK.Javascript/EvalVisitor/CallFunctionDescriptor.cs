@@ -1,6 +1,6 @@
 #region LGPL License
 /*----------------------------------------------------------------------------
-* This file (CK.Javascript\IExprVisitor.cs) is part of CiviKey. 
+* This file (CK.Javascript\EvalVisitor\CallFunctionDescriptor.cs) is part of CiviKey. 
 *  
 * CiviKey is free software: you can redistribute it and/or modify 
 * it under the terms of the GNU Lesser General Public License as published 
@@ -22,24 +22,28 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using CK.Core;
 
 namespace CK.Javascript
 {
-    /// <summary>
-    /// Basic visitor contract: it is parametrized with the returned type of the visit methods.
-    /// </summary>
-    /// <typeparam name="T">Type of the returned value of the visit methods.</typeparam>
-    public interface IExprVisitor<out T>
+    public struct CallFunctionDescriptor
     {
-        T VisitExpr( Expr e );
-        T Visit( AccessorMemberExpr e );
-        T Visit( AccessorIndexerExpr e );
-        T Visit( AccessorCallExpr e );
-        T Visit( BinaryExpr e );
-        T Visit( ConstantExpr e );
-        T Visit( IfExpr e );
-        T Visit( SyntaxErrorExpr e );
-        T Visit( UnaryExpr e );
+        public readonly IAccessorFrame Frame;
+        public readonly IReadOnlyList<RuntimeObj> Arguments;
+
+        public bool IsValid
+        {
+            get { return Frame != null; }
+        }
+
+        internal CallFunctionDescriptor( IAccessorFrame frame, IReadOnlyList<RuntimeObj> arguments )
+        {
+            Frame = frame;
+            Arguments = arguments;
+        }
     }
+
 }

@@ -1,6 +1,6 @@
 #region LGPL License
 /*----------------------------------------------------------------------------
-* This file (CK.Javascript\IExprVisitor.cs) is part of CiviKey. 
+* This file (CK.Javascript\EvalVisitor\EvaluatorExtensions.cs) is part of CiviKey. 
 *  
 * CiviKey is free software: you can redistribute it and/or modify 
 * it under the terms of the GNU Lesser General Public License as published 
@@ -22,24 +22,24 @@
 #endregion
 
 using System;
-using CK.Core;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace CK.Javascript
 {
-    /// <summary>
-    /// Basic visitor contract: it is parametrized with the returned type of the visit methods.
-    /// </summary>
-    /// <typeparam name="T">Type of the returned value of the visit methods.</typeparam>
-    public interface IExprVisitor<out T>
+    public static class EvaluatorExtensions
     {
-        T VisitExpr( Expr e );
-        T Visit( AccessorMemberExpr e );
-        T Visit( AccessorIndexerExpr e );
-        T Visit( AccessorCallExpr e );
-        T Visit( BinaryExpr e );
-        T Visit( ConstantExpr e );
-        T Visit( IfExpr e );
-        T Visit( SyntaxErrorExpr e );
-        T Visit( UnaryExpr e );
+        /// <summary>
+        /// Gets whether there is a <see cref="CurrentError"/>.
+        /// </summary>
+        /// <param name="this">This <see cref="IEvalVisitor"/>.</param>
+        /// <returns>True if an error is set on this evaluation visitor.</returns>
+        public static bool HasError( this IEvalVisitor @this )
+        {
+            return @this.CurrentError != null;
+        }
+
     }
 }

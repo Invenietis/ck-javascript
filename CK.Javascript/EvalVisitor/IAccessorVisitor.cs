@@ -1,6 +1,6 @@
 #region LGPL License
 /*----------------------------------------------------------------------------
-* This file (CK.Javascript\IExprVisitor.cs) is part of CiviKey. 
+* This file (CK.Javascript\EvalVisitor\IAccessorVisitor.cs) is part of CiviKey. 
 *  
 * CiviKey is free software: you can redistribute it and/or modify 
 * it under the terms of the GNU Lesser General Public License as published 
@@ -22,24 +22,25 @@
 #endregion
 
 using System;
-using CK.Core;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace CK.Javascript
 {
     /// <summary>
-    /// Basic visitor contract: it is parametrized with the returned type of the visit methods.
+    /// Any <see cref="RuntimeObj"/> and the <see cref="GlobalContext"/> support this interface.
+    /// This is the "binder to the external world" for any <see cref="IEvalVisitor"/>.  
     /// </summary>
-    /// <typeparam name="T">Type of the returned value of the visit methods.</typeparam>
-    public interface IExprVisitor<out T>
+    public interface IAccessorVisitor
     {
-        T VisitExpr( Expr e );
-        T Visit( AccessorMemberExpr e );
-        T Visit( AccessorIndexerExpr e );
-        T Visit( AccessorCallExpr e );
-        T Visit( BinaryExpr e );
-        T Visit( ConstantExpr e );
-        T Visit( IfExpr e );
-        T Visit( SyntaxErrorExpr e );
-        T Visit( UnaryExpr e );
+        /// <summary>
+        /// Handles the given <see cref="IAccessorFrame"/>.
+        /// Through <see cref="IAccessorFrame.NextAccessor"/>, subsequent members, calls or indexers can be evaluated: 
+        /// the <see cref="IAccessorFrame.SetRuntimeError"/> or <see cref="IAccessorFrame.SetResult"/> methods on the deepest handled frame must then be called
+        /// to store the result and shortcut the evaluation process.
+        /// </summary>
+        /// <param name="frame">The frame to handle.</param>
+        void Visit( IEvalVisitor v, IAccessorFrame frame );
     }
 }

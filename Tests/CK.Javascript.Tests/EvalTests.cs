@@ -1,24 +1,26 @@
-﻿#region LGPL License
-/* ----------------------------------------------------------------------------
-*  This file (EvalTests.cs) is part of CK-Javascript. 
-*   
-*  CK-Javascript is free software: you can redistribute it and/or modify 
-*  it under the terms of the GNU Lesser General Public License as published 
-*  by the Free Software Foundation, either version 3 of the License, or 
-*  (at your option) any later version. 
-*   
-*  CK-Javascript is distributed in the hope that it will be useful, 
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-*  GNU Lesser General Public License for more details. 
-*  You should have received a copy of the GNU Lesser General Public License 
-*  along with CK-Javascript.  If not, see <http://www.gnu.org/licenses/>. 
-*   
-*  Copyright © 2013, 
-*      Invenietis <http://www.invenietis.com>
-*  All rights reserved. 
-* -----------------------------------------------------------------------------*/
+#region LGPL License
+/*----------------------------------------------------------------------------
+* This file (Tests\CK.Javascript.Tests\EvalTests.cs) is part of CiviKey. 
+*  
+* CiviKey is free software: you can redistribute it and/or modify 
+* it under the terms of the GNU Lesser General Public License as published 
+* by the Free Software Foundation, either version 3 of the License, or 
+* (at your option) any later version. 
+*  
+* CiviKey is distributed in the hope that it will be useful, 
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+* GNU Lesser General Public License for more details. 
+* You should have received a copy of the GNU Lesser General Public License 
+* along with CiviKey.  If not, see <http://www.gnu.org/licenses/>. 
+*  
+* Copyright © 2007-2014, 
+*     Invenietis <http://www.invenietis.com>,
+*     In’Tech INFO <http://www.intechinfo.fr>,
+* All rights reserved. 
+*-----------------------------------------------------------------------------*/
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +28,7 @@ using System.Text;
 using NUnit.Framework;
 using CK.Javascript;
 
-namespace CK.MultiPlan.Tests.Language
+namespace CK.Javascript.Tests
 {
     [TestFixture]
     public class EvalTests
@@ -36,26 +38,26 @@ namespace CK.MultiPlan.Tests.Language
         {
             RuntimeObj o;
             {
-                o = Eval( "6" );
+                o = EvalVisitor.Evaluate( "6" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( 6 ) );
             }
             {
-                o = Eval( "6+++8" );
+                o = EvalVisitor.Evaluate( "6+++8" );
                 Assert.That( o is RuntimeError );
             }
             {
-                o = Eval( "(6+6)*3/4*2" );
+                o = EvalVisitor.Evaluate( "(6+6)*3/4*2" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( (6.0 + 6.0) * 3.0 / 4.0 * 2.0 ) );
             }
             {
-                o = Eval( "8*5/4+1-(100/5/4)" );
+                o = EvalVisitor.Evaluate( "8*5/4+1-(100/5/4)" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( 8.0 * 5.0 / 4.0 + 1.0 - (100.0 / 5.0 / 4.0) ) );
             }
             {
-                o = Eval( "8*5/4+1-(100/5/4) > 1 ? 14+56/7/2-4 : (14+13+12)/2*47/3" );
+                o = EvalVisitor.Evaluate( "8*5/4+1-(100/5/4) > 1 ? 14+56/7/2-4 : (14+13+12)/2*47/3" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( 14.0 + 56.0 / 7.0 / 2.0 - 4.0 ) );
             }
@@ -66,32 +68,32 @@ namespace CK.MultiPlan.Tests.Language
         {
             RuntimeObj o;
             {
-                o = Eval( "7 + '45' / 2 * '10' / '4'" );
+                o = EvalVisitor.Evaluate( "7 + '45' / 2 * '10' / '4'" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( 7.0 + 45.0 / 2.0 * 10.0 / 4.0 ) );
             }
             {
-                o = Eval( "'45' + 4 == '454'" );
+                o = EvalVisitor.Evaluate( "'45' + 4 == '454'" );
                 Assert.That( o is JSEvalBoolean );
                 Assert.That( o.ToBoolean(), Is.True );
             }
             {
-                o = Eval( "'45' <= '454'" );
+                o = EvalVisitor.Evaluate( "'45' <= '454'" );
                 Assert.That( o is JSEvalBoolean );
                 Assert.That( o.ToBoolean(), Is.True );
             }
             {
-                o = Eval( "45 <= '454'" );
+                o = EvalVisitor.Evaluate( "45 <= '454'" );
                 Assert.That( o is JSEvalBoolean );
                 Assert.That( o.ToBoolean(), Is.True );
             }
             {
-                o = Eval( "'45' > 454" );
+                o = EvalVisitor.Evaluate( "'45' > 454" );
                 Assert.That( o is JSEvalBoolean );
                 Assert.That( o.ToBoolean(), Is.False );
             }
             {
-                o = Eval( "'olivier' < 'spi'" );
+                o = EvalVisitor.Evaluate( "'olivier' < 'spi'" );
                 Assert.That( o is JSEvalBoolean );
                 Assert.That( o.ToBoolean(), Is.True );
             }
@@ -222,12 +224,6 @@ namespace CK.MultiPlan.Tests.Language
         }
 
         [Test]
-        public void TestCKReadOnly()
-        {
-
-        }
-
-        [Test]
         public void CallFunc()
         {
             IsBoolean( "(400+50+3).toString() === '453'", true );
@@ -247,48 +243,38 @@ namespace CK.MultiPlan.Tests.Language
         [Test]
         public void Dates()
         {
-            //IsDate( "Date(2012,4,26)", new DateTime( 2012, 4, 26, 0, 0, 0, DateTimeKind.Utc ) );
-            //IsDate( "Date(2012,4)", new DateTime( 2012, 4, 1, 0, 0, 0, DateTimeKind.Utc ) );
-            //IsDate( "Date(2012)", new DateTime( 2012, 1, 1, 0, 0, 0, DateTimeKind.Utc ) );
-            //IsDate( "Date(2012,-4,-26)", new DateTime( 2012, 1, 1, 0, 0, 0, DateTimeKind.Utc ) );
+            IsDate( "Date(2012,4,26)", new DateTime( 2012, 4, 26, 0, 0, 0, DateTimeKind.Utc ) );
+            IsDate( "Date(2012,4)", new DateTime( 2012, 4, 1, 0, 0, 0, DateTimeKind.Utc ) );
+            IsDate( "Date(2012)", new DateTime( 2012, 1, 1, 0, 0, 0, DateTimeKind.Utc ) );
+            IsDate( "Date(2012,-4,-26)", new DateTime( 2012, 1, 1, 0, 0, 0, DateTimeKind.Utc ) );
 
-            //IsBoolean( "Date(2012) < Date(2013)", true );
+            IsBoolean( "Date(2012) < Date(2013)", true );
             IsBoolean( "Date(2012) == Date(2012)", true );
 
             IsBoolean( "Date(2012,4,3) == Date(2012,4,3)", true );
             IsBoolean( "Date(2012,4,3) != Date(2012,4,3,1)", true );
         }
 
-        void IsBoolean( string s, bool v = true, string msg = null )
+        static void IsBoolean( string s, bool v = true, string msg = null )
         {
-            RuntimeObj o = Eval( s );
+            RuntimeObj o = EvalVisitor.Evaluate( s );
             Assert.That( o is JSEvalBoolean );
             Assert.That( o.ToBoolean(), Is.EqualTo( v ), msg ?? s );
         }
 
-        void IsDate( string s, DateTime v, string msg = null )
+        static void IsDate( string s, DateTime v, string msg = null )
         {
-            RuntimeObj o = Eval( s );
+            RuntimeObj o = EvalVisitor.Evaluate( s );
             Assert.That( o is JSEvalDate );
             Assert.That( ((JSEvalDate)o).CompareTo( v ), Is.EqualTo( 0 ), msg ?? s );
         }
 
-        void IsNumber( string s, double v, string msg = null )
+        static void IsNumber( string s, double v, string msg = null )
         {
-            RuntimeObj o = Eval( s );
+            RuntimeObj o = EvalVisitor.Evaluate( s );
             Assert.That( o is JSEvalNumber );
             Assert.That( o.ToDouble(), Is.EqualTo( v ), msg ?? s );
         }
 
-        static RuntimeObj Eval( string s )
-        {
-            JSTokeniser p = new JSTokeniser();
-            p.Reset( s );
-            ExprAnalyser a = new ExprAnalyser( new StaticSyntaxicScope() );
-            Expr e = a.Analyse( p );
-            EvalVisitor v = new EvalVisitor( new GlobalContext() );
-            v.VisitExpr( e );
-            return v.Current;
-        }
     }
 }
