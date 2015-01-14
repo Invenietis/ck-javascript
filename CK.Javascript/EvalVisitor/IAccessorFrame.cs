@@ -83,7 +83,7 @@ namespace CK.Javascript
         /// <summary>
         /// Evaluates <see cref="AccessorExpr.CallArguments"/> of <see cref="Expr"/> of this frame.
         /// </summary>
-        /// <param name="maxParameterCount">The numbers of parameters to evaluate: use a negative value (-1) to evaluate all the arguments.</param>
+        /// <param name="maxCount">The numbers of parameters to evaluate: use a negative value (-1) to evaluate all the arguments.</param>
         /// <returns></returns>
         IReadOnlyList<RuntimeObj> EvalCallArguments( int maxCount = -1 );
 

@@ -40,6 +40,7 @@ namespace CK.Javascript
         /// the <see cref="IAccessorFrame.SetRuntimeError"/> or <see cref="IAccessorFrame.SetResult"/> methods on the deepest handled frame must then be called
         /// to store the result and shortcut the evaluation process.
         /// </summary>
+        /// <param name="v">The visitor.</param>
         /// <param name="frame">The frame to handle.</param>
         void Visit( IEvalVisitor v, IAccessorFrame frame );
     }

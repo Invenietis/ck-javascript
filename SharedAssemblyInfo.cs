@@ -26,10 +26,10 @@ using System.Reflection;
 
 [assembly: AssemblyProduct("CK.Javascript")]
 [assembly: AssemblyCompany("Invenietis")]
-[assembly: AssemblyCopyright("Copyright (c) Invenietis 2014")]
+[assembly: AssemblyCopyright("Copyright (c) Invenietis 2013-2015")]
 [assembly: AssemblyTrademark("")]
 
-[assembly: AssemblyVersion("1.2.0")]
+[assembly: AssemblyVersion("1.2.1")]
 
 
 #if DEBUG
