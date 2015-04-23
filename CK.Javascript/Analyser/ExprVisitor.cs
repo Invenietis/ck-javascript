@@ -57,24 +57,24 @@ namespace CK.Javascript
             return lV == e.Left && aV == e.Arguments ? e : new AccessorCallExpr( e.Location, lV, aV );
         }
 
-        public IReadOnlyList<Expr> Visit( IReadOnlyList<Expr> args )
+        public IReadOnlyList<Expr> Visit( IReadOnlyList<Expr> multi )
         {
-            Expr[] newArgs = null;
-            for( int i = 0; i < args.Count; ++i )
+            Expr[] newMulti = null;
+            for( int i = 0; i < multi.Count; ++i )
             {
-                Expr p = args[i];
+                Expr p = multi[i];
                 Expr sp = VisitExpr( p );
-                if( newArgs != null ) newArgs[i] = sp;
+                if( newMulti != null ) newMulti[i] = sp;
                 else if( p != sp )
                 {
-                    newArgs = new Expr[args.Count];
+                    newMulti = new Expr[multi.Count];
                     int j = i;
-                    while( --j >= 0 ) newArgs[j] = args[j];
-                    newArgs[i] = sp;
+                    while( --j >= 0 ) newMulti[j] = multi[j];
+                    newMulti[i] = sp;
                 }
             }
-            if( newArgs != null ) args = newArgs.ToReadOnlyList();
-            return args;
+            if( newMulti != null ) multi = newMulti.ToReadOnlyList();
+            return multi;
         }
 
         public virtual Expr Visit( BinaryExpr e )
@@ -106,6 +106,12 @@ namespace CK.Javascript
         public virtual Expr Visit( SyntaxErrorExpr e )
         {
             return e;
+        }
+
+        public virtual Expr Visit( BlockExpr e )
+        {
+            var sV = Visit( e.Statements );
+            return sV == e.Statements ? e : new BlockExpr( e.Location, sV );
         }
 
     }

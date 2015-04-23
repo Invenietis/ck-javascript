@@ -1,6 +1,6 @@
 #region LGPL License
 /*----------------------------------------------------------------------------
-* This file (CK.Javascript\IExprVisitor.cs) is part of CiviKey. 
+* This file (CK.Javascript\Expression.cs) is part of CiviKey. 
 *  
 * CiviKey is free software: you can redistribute it and/or modify 
 * it under the terms of the GNU Lesser General Public License as published 
@@ -22,24 +22,38 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Linq.Expressions;
 using CK.Core;
+using System.Diagnostics;
 
 namespace CK.Javascript
 {
-    /// <summary>
-    /// Basic visitor contract: it is parametrized with the returned type of the visit methods.
-    /// </summary>
-    /// <typeparam name="T">Type of the returned value of the visit methods.</typeparam>
-    public interface IExprVisitor<out T>
+    public class BlockExpr : Expr
     {
-        T VisitExpr( Expr e );
-        T Visit( AccessorMemberExpr e );
-        T Visit( AccessorIndexerExpr e );
-        T Visit( AccessorCallExpr e );
-        T Visit( BinaryExpr e );
-        T Visit( ConstantExpr e );
-        T Visit( IfExpr e );
-        T Visit( SyntaxErrorExpr e );
-        T Visit( UnaryExpr e );
+        public BlockExpr( SourceLocation location, IReadOnlyList<Expr> statements )
+            : base( location, false )
+        {
+            if( statements == null ) throw new ArgumentNullException();
+            Statements = statements;
+        }
+
+        public IReadOnlyList<Expr> Statements { get; private set; }
+
+        [DebuggerStepThrough]
+        internal protected override T Accept<T>( IExprVisitor<T> visitor )
+        {
+            return visitor.Visit( this );
+        }
+
+        public override string ToString()
+        {
+            return '{' + String.Join( " ", Statements.Select( s => s.ToString() ) ) + '}';
+        }
+
     }
+
+
 }

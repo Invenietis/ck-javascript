@@ -62,7 +62,15 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analyser\Expressions\Expr.cs" />
+    <Compile Include="Analyser\Expressions\BlockExpr.cs" />
+    <Compile Include="Analyser\Expressions\SyntaxErrorExpr.cs" />
+    <Compile Include="Analyser\Expressions\ConstantExpr.cs" />
+    <Compile Include="Analyser\Expressions\AccessorExpr.cs" />
+    <Compile Include="Analyser\Expressions\BinaryExpr.cs" />
+    <Compile Include="Analyser\Expressions\UnaryExpr.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.Accessors.cs" />
+    <Compile Include="EvalVisitor\EvalVisitor.Expr.Block.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.Unary.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.If.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.Binary.cs" />
@@ -73,11 +81,11 @@
     <Compile Include="EvalVisitor\RefRuntimeObj.cs" />
     <Compile Include="ScriptEngine\BreakpointManager.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Frame.cs" />
-    <Compile Include="Expr.cs" />
-    <Compile Include="ExprAnalyser.cs" />
-    <Compile Include="ExprVisitor.cs" />
-    <Compile Include="IExprVisitor.cs" />
-    <Compile Include="ISyntaxicScope.cs" />
+    <Compile Include="Analyser\Expressions\IfExpr.cs" />
+    <Compile Include="Analyser\ExprAnalyser.cs" />
+    <Compile Include="Analyser\ExprVisitor.cs" />
+    <Compile Include="Analyser\IExprVisitor.cs" />
+    <Compile Include="Analyser\ISyntaxicScope.cs" />
     <Compile Include="JSSupport.cs" />
     <Compile Include="ScriptEngine\IScriptEngineResult.cs" />
     <Compile Include="ScriptEngine\ScriptEngine.EvaluationResult.cs" />
@@ -100,8 +108,8 @@
     <Compile Include="EvalVisitor\RuntimeObj.cs" />
     <Compile Include="EvalVisitor\RuntimeObjComparer.cs" />
     <Compile Include="Tokeniser\SourceLocation.cs" />
-    <Compile Include="SyntaxErrorCollector.cs" />
-    <Compile Include="SyntaxicScope.cs" />
+    <Compile Include="Analyser\SyntaxErrorCollector.cs" />
+    <Compile Include="Analyser\SyntaxicScope.cs" />
     <Compile Include="ToStringVisitor.cs" />
   </ItemGroup>
   <ItemGroup>

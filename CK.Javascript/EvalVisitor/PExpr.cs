@@ -8,7 +8,7 @@ namespace CK.Javascript
 {
 
     /// <summary>
-    /// Promise of an <see cref="Expr"/>: either a Expr or a <see cref=""/>.
+    /// Promise of an <see cref="Expr"/>: either a Expression or a <see cref="IDeferredExpr"/>.
     /// </summary>
     public struct PExpr
     {

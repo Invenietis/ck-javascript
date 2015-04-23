@@ -43,10 +43,13 @@ namespace CK.Javascript
             _scope = scope;
         }
 
-        public Expr Analyse( JSTokeniser p )
+        public Expr Analyse( JSTokeniser p, bool allowBlock = true )
         {
             _parser = p;
-            return Expression( 0 );
+            var e = Expression( 0 );
+            _parser.Match( JSTokeniserToken.SemiColon );
+            if( !allowBlock ) return e;
+            return HandleBlock( e );
         }
 
         public static Expr AnalyseString( string s )
@@ -72,17 +75,55 @@ namespace CK.Javascript
         protected virtual Expr HandleNud()
         {
             Debug.Assert( !_parser.IsErrorOrEndOfInput );
+            while( _parser.Match( JSTokeniserToken.SemiColon ) ) ;
             if( _parser.IsNumber ) return HandleNumber();
             if( _parser.IsString ) return new ConstantExpr( _parser.Location, _parser.ReadString() );
             if( _parser.IsUnaryOperatorExtended || _parser.CurrentToken == JSTokeniserToken.Minus ) return HandleUnaryExpr();
             if( _parser.IsIdentifier ) return HandleIdentifier();
+            if( _parser.Match( JSTokeniserToken.OpenCurly ) ) return HandleBlock();
+            if( _parser.MatchIdentifier( "if" ) ) return HandleIf();
             if( _parser.Match( JSTokeniserToken.OpenPar ) )
             {
                 SourceLocation location = _parser.PrevNonCommentLocation;
                 Expr e = Expression( 0 );
-                return _parser.Match( JSTokeniserToken.ClosePar ) ? e : new SyntaxErrorExpr( _parser.Location, "Expected ) opened at {0}.", location );
+                if( e is SyntaxErrorExpr ) return e;
+                return _parser.Match( JSTokeniserToken.ClosePar ) ? e : new SyntaxErrorExpr( _parser.Location, "Expected ')' opened at {0}.", location );
             }
             return new SyntaxErrorExpr( _parser.Location, "Syntax Error." );
+        }
+
+        Expr HandleIf()
+        {
+            SourceLocation location = _parser.PrevNonCommentLocation;
+            if( !_parser.Match( JSTokeniserToken.OpenPar ) ) return new SyntaxErrorExpr( _parser.Location, "Expected '('." );
+            Expr c = Expression( 0 );
+            if( !_parser.Match( JSTokeniserToken.ClosePar ) ) return new SyntaxErrorExpr( _parser.Location, "Expected ')'." );
+            Expr whenTrue = HandleStatement();
+            Expr whenFalse = null;
+            if( _parser.MatchIdentifier( "else" ) ) whenFalse = HandleStatement();
+            return new IfExpr( location, false, c, whenTrue, whenFalse );
+        }
+
+        Expr HandleStatement()
+        {
+            if( !_parser.Match( JSTokeniserToken.OpenCurly ) ) return HandleBlock();
+            return Expression( 0 );
+        }
+
+        Expr HandleBlock( Expr first = null )
+        {
+            SourceLocation location = _parser.PrevNonCommentLocation;
+            List<Expr> statements = new List<Expr>();
+            if( first != null ) statements.Add( first );
+            while( (first == null && !_parser.Match( JSTokeniserToken.CloseCurly )) || !(first == null || _parser.IsEndOfInput) )
+            {
+                Expr e = Expression( 0 );
+                _parser.Match( JSTokeniserToken.SemiColon );
+                statements.Add( e );
+                if( e is SyntaxErrorExpr ) break; 
+            }
+            if( statements.Count == 1 ) return statements[0];
+            return new BlockExpr( location, statements != null ? (IReadOnlyList<Expr>)statements.ToArray() : CKReadOnlyListEmpty<Expr>.Empty );
         }
 
         protected virtual Expr HandleLed( Expr left )
@@ -96,9 +137,16 @@ namespace CK.Javascript
             return new SyntaxErrorExpr( _parser.Location, "Syntax Error." );
         }
 
+        //Expr HandleStatementTerminator( Expr left )
+        //{
+        //    if( left is StatementExpr ) return left;
+        //    return new StatementExpr( _parser.PrevNonCommentLocation, left );
+        //}
+
         Expr HandleMember( Expr left )
         {
             string id = _parser.ReadIdentifier();
+            if( id == null ) return new SyntaxErrorExpr( _parser.Location, "Identifier expected." );
             return new AccessorMemberExpr( _parser.PrevNonCommentLocation, left, id );
         }
 

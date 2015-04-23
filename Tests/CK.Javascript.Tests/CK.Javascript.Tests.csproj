@@ -58,6 +58,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="BasicBreakpointSupport.cs" />
+    <Compile Include="StatementTests.cs" />
     <Compile Include="EvalTests.cs" />
     <Compile Include="JSAnalyserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
