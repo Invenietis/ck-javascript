@@ -1,6 +1,6 @@
 #region LGPL License
 /*----------------------------------------------------------------------------
-* This file (CK.Javascript\EvalVisitor\EvaluatorExtensions.cs) is part of CiviKey. 
+* This file (CK.Javascript\EvalVisitor\EvalVisitor.cs) is part of CiviKey. 
 *  
 * CiviKey is free software: you can redistribute it and/or modify 
 * it under the terms of the GNU Lesser General Public License as published 
@@ -25,20 +25,26 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using CK.Core;
+using System.Collections.ObjectModel;
 
 namespace CK.Javascript
 {
-    public static class EvaluatorExtensions
+
+    public partial class EvalVisitor
     {
-        /// <summary>
-        /// Gets whether there is a <see cref="CurrentError"/>.
-        /// </summary>
-        /// <param name="this">This <see cref="IEvalVisitor"/>.</param>
-        /// <returns>True if an error is set on this evaluation visitor.</returns>
-        public static bool HasError( this IEvalVisitor @this )
+        public PExpr Visit( ConstantExpr e )
         {
-            return @this.CurrentError != null;
+            if( e.Value == null || e.Value is string ) return new PExpr( _global.CreateString( (string)e.Value ) );
+            if( e.Value is Double ) return new PExpr( _global.CreateNumber( (Double)e.Value ) );
+            if( e.Value is Boolean ) return new PExpr( _global.CreateBoolean( (Boolean)e.Value ) );
+            return new PExpr( new RuntimeError( e, "Unsupported JS type: " + e.Value.GetType().Name ) );
+        }
+
+        public PExpr Visit( SyntaxErrorExpr e )
+        {
+            return new PExpr( _global.CreateRuntimeError( e, e.ErrorMessage ) );
         }
 
     }

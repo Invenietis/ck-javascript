@@ -34,73 +34,79 @@ namespace CK.Javascript.Tests
     public class EvalTests
     {
         [Test]
-        public void BasicNumbers()
+        public void evaluating_basic_numbers_expressions()
         {
             RuntimeObj o;
             {
-                o = EvalVisitor.Evaluate( "6" );
+                o = ScriptEngine.Evaluate( "6" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( 6 ) );
             }
             {
-                o = EvalVisitor.Evaluate( "6+++8" );
+                o = ScriptEngine.Evaluate( "6+++8" );
                 Assert.That( o is RuntimeError );
             }
             {
-                o = EvalVisitor.Evaluate( "(6+6)*3/4*2" );
+                o = ScriptEngine.Evaluate( "(6+6)*3/4*2" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( (6.0 + 6.0) * 3.0 / 4.0 * 2.0 ) );
             }
             {
-                o = EvalVisitor.Evaluate( "8*5/4+1-(100/5/4)" );
+                o = ScriptEngine.Evaluate( "8*5/4+1-(100/5/4)" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( 8.0 * 5.0 / 4.0 + 1.0 - (100.0 / 5.0 / 4.0) ) );
             }
             {
-                o = EvalVisitor.Evaluate( "8*5/4+1-(100/5/4) > 1 ? 14+56/7/2-4 : (14+13+12)/2*47/3" );
+                o = ScriptEngine.Evaluate( "8*5/4+1-(100/5/4) > 1 ? 14+56/7/2-4 : (14+13+12)/2*47/3" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( 14.0 + 56.0 / 7.0 / 2.0 - 4.0 ) );
             }
         }
 
         [Test]
-        public void StringAndNumbers()
+        public void strings_are_automatically_converted_to_numbers_by_arithmetic_operators()
         {
             RuntimeObj o;
             {
-                o = EvalVisitor.Evaluate( "7 + '45' / 2 * '10' / '4'" );
+                o = ScriptEngine.Evaluate( "7 + '45' / 2 * '10' / '4'" );
                 Assert.That( o is JSEvalNumber );
                 Assert.That( o.ToDouble(), Is.EqualTo( 7.0 + 45.0 / 2.0 * 10.0 / 4.0 ) );
             }
+        }
+
+        [Test]
+        public void comparing_strings_and_numbers()
+        {
+            RuntimeObj o;
             {
-                o = EvalVisitor.Evaluate( "'45' + 4 == '454'" );
+                o = ScriptEngine.Evaluate( "'45' + 4 == '454'" );
                 Assert.That( o is JSEvalBoolean );
                 Assert.That( o.ToBoolean(), Is.True );
             }
             {
-                o = EvalVisitor.Evaluate( "'45' <= '454'" );
+                o = ScriptEngine.Evaluate( "'45' <= '454'" );
                 Assert.That( o is JSEvalBoolean );
                 Assert.That( o.ToBoolean(), Is.True );
             }
             {
-                o = EvalVisitor.Evaluate( "45 <= '454'" );
+                o = ScriptEngine.Evaluate( "45 <= '454'" );
                 Assert.That( o is JSEvalBoolean );
                 Assert.That( o.ToBoolean(), Is.True );
             }
             {
-                o = EvalVisitor.Evaluate( "'45' > 454" );
+                o = ScriptEngine.Evaluate( "'45' > 454" );
                 Assert.That( o is JSEvalBoolean );
                 Assert.That( o.ToBoolean(), Is.False );
             }
             {
-                o = EvalVisitor.Evaluate( "'olivier' < 'spi'" );
+                o = ScriptEngine.Evaluate( "'olivier' < 'spi'" );
                 Assert.That( o is JSEvalBoolean );
                 Assert.That( o.ToBoolean(), Is.True );
             }
         }
 
         [Test]
-        public void BitwiseOnNumbers()
+        public void biwise_operations_on_numbers()
         {
             IsNumber( "7&3 == 3", 1, "=> 7&(3 == 3)" );
             IsBoolean( "(7&3) == 3" );
@@ -112,11 +118,10 @@ namespace CK.Javascript.Tests
             IsNumber( "~7", -8 );
             IsNumber( "~(7|1)", -8 );
             IsNumber( "~7|1", -7 );
-
         }
 
         [Test]
-        public void Ternary()
+        public void ternary_operator()
         {
             IsBoolean( "3 ? true : false", true );
             IsBoolean( "0 ? true : false", false );
@@ -126,7 +131,7 @@ namespace CK.Javascript.Tests
         }
 
         [Test]
-        public void Inequality()
+        public void multiple_inequalities()
         {
             {
                 IsBoolean( "45 > 45", false );
@@ -190,7 +195,7 @@ namespace CK.Javascript.Tests
         }
 
         [Test]
-        public void Equality()
+        public void multiple_equalities()
         {
             IsBoolean( "45 == 45", true );
             IsBoolean( "45 == '45'", true );
@@ -224,7 +229,7 @@ namespace CK.Javascript.Tests
         }
 
         [Test]
-        public void CallFunc()
+        public void number_toString_method_supports_base_from_2_to_36()
         {
             IsBoolean( "(400+50+3).toString() === '453'", true );
             IsBoolean( "(-98979).toString(2) === '-11000001010100011'", true );
@@ -241,7 +246,7 @@ namespace CK.Javascript.Tests
         }
 
         [Test]
-        public void Dates()
+        public void dates_are_actually_DateTime_in_UTC()
         {
             IsDate( "Date(2012,4,26)", new DateTime( 2012, 4, 26, 0, 0, 0, DateTimeKind.Utc ) );
             IsDate( "Date(2012,4)", new DateTime( 2012, 4, 1, 0, 0, 0, DateTimeKind.Utc ) );
@@ -257,21 +262,21 @@ namespace CK.Javascript.Tests
 
         static void IsBoolean( string s, bool v = true, string msg = null )
         {
-            RuntimeObj o = EvalVisitor.Evaluate( s );
+            RuntimeObj o = ScriptEngine.Evaluate( s );
             Assert.That( o is JSEvalBoolean );
             Assert.That( o.ToBoolean(), Is.EqualTo( v ), msg ?? s );
         }
 
         static void IsDate( string s, DateTime v, string msg = null )
         {
-            RuntimeObj o = EvalVisitor.Evaluate( s );
+            RuntimeObj o = ScriptEngine.Evaluate( s );
             Assert.That( o is JSEvalDate );
             Assert.That( ((JSEvalDate)o).CompareTo( v ), Is.EqualTo( 0 ), msg ?? s );
         }
 
         static void IsNumber( string s, double v, string msg = null )
         {
-            RuntimeObj o = EvalVisitor.Evaluate( s );
+            RuntimeObj o = ScriptEngine.Evaluate( s );
             Assert.That( o is JSEvalNumber );
             Assert.That( o.ToDouble(), Is.EqualTo( v ), msg ?? s );
         }

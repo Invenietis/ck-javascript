@@ -82,9 +82,10 @@ namespace CK.Javascript
             return RuntimeObj.Undefined;
         }
 
-        public override void Visit( IEvalVisitor v, IAccessorFrame frame )
+        public override PExpr Visit( IAccessorFrame frame )
         {
-            if( frame.Expr.IsMember( "message" ) ) frame.SetResult( v.Global.CreateString( Message ) );
+            if( frame.Expr.IsMember( "message" ) ) return frame.SetResult( frame.Global.CreateString( Message ) );
+            return frame.SetError();
         }
 
         public override string ToString()

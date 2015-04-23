@@ -63,16 +63,18 @@ namespace CK.Javascript
             return JSSupport.ToString( _value );
         }
 
-        public override void Visit(  IEvalVisitor v, IAccessorFrame frame )
+        public override PExpr Visit( IAccessorFrame frame )
         {
-            CallFunctionDescriptor f = frame.MatchCall( "toString", 1 ); 
-            if( f.IsValid )
-            {
-                int radix = 10;
-                if( f.Arguments.Count == 1 ) radix = JSSupport.ToInt32( f.Arguments[0].ToDouble() );
-                if( radix < 2 || radix > 36 ) f.Frame.SetRuntimeError( "Radix must be between 2 and 36." );
-                else f.Frame.SetResult( v.Global.CreateString( JSSupport.ToString( _value, radix ) ) );
-            }
+            var s = frame.GetState( c => 
+                c.On("toString").OnCall( 1, (f,args) => 
+                {
+                    int radix = 10;
+                    if( args.Count == 1 ) radix = JSSupport.ToInt32( args[0].ToDouble() );
+                    if( radix < 2 || radix > 36 ) return f.SetError( "Radix must be between 2 and 36." );
+                    return f.SetResult( f.Global.CreateString( JSSupport.ToString( _value, radix ) ) );
+                }
+                ) );
+            return s != null ? s.Visit() : frame.SetError();
         }
 
     }

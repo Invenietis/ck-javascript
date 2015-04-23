@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CK.Core;
 using NUnit.Framework;
 
 namespace CK.Javascript.Tests
@@ -35,57 +36,109 @@ namespace CK.Javascript.Tests
     {
         class Context : GlobalContext
         {
-            public double [] Array = new double[0];
+            public double [] AnIntrinsicArray = new double[0];
 
-            public override void Visit( IEvalVisitor v, IAccessorFrame frame )
+            public override PExpr Visit( IAccessorFrame frame )
             {
-                IAccessorFrame frameArray = frame.MatchMember( "Array" );
-                if( frameArray != null )
-                {
-                    AccessorIndexerExpr indexer = frameArray.Expr as AccessorIndexerExpr;
-                    if( indexer != null )
+                var s = frame.GetState( c => c
+                    .On( "AnIntrinsicArray" ).OnIndex( ( f, idx ) =>
                     {
-                        v.VisitExpr( indexer.Index );
-                        if( !v.HasError() )
-                        {
-                            if( v.Current.Type != "number" )
-                            {
-                                frameArray.SetRuntimeError( "Number expected." );
-                            }
-                            else
-                            {
-                                int i = JSSupport.ToInt32( v.Current.ToDouble() );
-                                if( i < 0 || i >= Array.Length ) frameArray.SetRuntimeError( "Index out of range." );
-                                else frameArray.SetResult( CreateNumber( Array[i] ) );
-                            }
-                        }
-                    }
-                }
-                base.Visit( v, frame );
+                        if( idx.Type != "number" ) return f.SetError( "Number expected." );
+                        int i = JSSupport.ToInt32( idx.ToDouble() );
+                        if( i < 0 || i >= AnIntrinsicArray.Length ) return f.SetError( "Index out of range." );
+                        return f.SetResult( CreateNumber( AnIntrinsicArray[i] ) );
+                    } )
+                    .On( "An" ).On( "array" ).On( "with" ).On( "one" ).On( "cell" ).OnIndex( ( f, idx ) =>
+                    {
+                        return f.SetResult( CreateString( "An.array.with.one.cell[] => " + idx.ToString() ) );
+                    } )
+                    .On( "array" ).OnIndex( ( f, idx ) =>
+                    {
+                        throw new CKException( "Accessing XXX.array other than 'An.Array' must not be found." );
+                    } )
+                    .On( "Ghost" ).On( "M" ).OnCall( -1, ( f, args ) =>
+                    {
+                        Console.WriteLine( "Ghost.M() called with {0} arguments: {1} (=> returned {0}).", 
+                                                args.Count, 
+                                                String.Join( ", ", args.Select( a => a.ToString() )) );
+                        return f.SetResult( f.Global.CreateNumber( args.Count ) );
+                    } )
+                    .On( "Ghost" ).On( "M" ).OnIndex( ( f, idx ) =>
+                    {
+                        Console.WriteLine( "Ghost.M[{0}] called (=> returned {0}).", JSSupport.ToInt32( idx.ToDouble() ) );
+                        return f.SetResult( idx );
+                    } )
+                    );
+                return s == null ? base.Visit( frame ) : s.Visit();
             }
         }
 
         [Test]
-        public void AccessToIntrinsicArray()
+        public void access_to_a_non_exisitng_object_on_the_Context_is_a_runtime_error()
         {
-            RuntimeObj o = EvalVisitor.Evaluate( "Array[0]" );
+            RuntimeObj o = ScriptEngine.Evaluate( "AnIntrinsicArray[0]" );
             Assert.That( o is RuntimeError );
+        }
+
+
+        [Test]
+        public void access_to_members_via_On_does_not_fallback()
+        {
             var ctx = new Context();
-            o = EvalVisitor.Evaluate( "Array[0]", ctx );
+            RuntimeObj o = ScriptEngine.Evaluate( "An.array.with.one.cell[6]", ctx );
+            Assert.That( o is JSEvalString && o.ToString() == "An.array.with.one.cell[] => 6" );
+
+            o = ScriptEngine.Evaluate( "array", ctx );
+            Assert.That( o is RuntimeError );
+            
+            o = ScriptEngine.Evaluate( "XX.array", ctx );
+            Assert.That( o is RuntimeError );
+        }
+
+        [Test]
+        public void access_to_AnIntrinsicArray_exposed_by_the_Context()
+        {
+            RuntimeObj o;
+            var ctx = new Context();
+            o = ScriptEngine.Evaluate( "AnIntrinsicArray[0]", ctx );
             Assert.That( ((RuntimeError)o).Message, Is.EqualTo( "Index out of range." ) );
-            ctx.Array = new[] { 1.2 };
-            o = EvalVisitor.Evaluate( "Array[-1]", ctx );
+            ctx.AnIntrinsicArray = new[] { 1.2 };
+            o = ScriptEngine.Evaluate( "AnIntrinsicArray[-1]", ctx );
             Assert.That( ((RuntimeError)o).Message, Is.EqualTo( "Index out of range." ) );
-            o = EvalVisitor.Evaluate( "Array[2]", ctx );
+            o = ScriptEngine.Evaluate( "AnIntrinsicArray[2]", ctx );
             Assert.That( ((RuntimeError)o).Message, Is.EqualTo( "Index out of range." ) );
-            o = EvalVisitor.Evaluate( "Array[0]", ctx );
+            o = ScriptEngine.Evaluate( "AnIntrinsicArray[0]", ctx );
             Assert.That( o is JSEvalNumber );
             Assert.That( o.ToDouble(), Is.EqualTo( 1.2 ) );
-            ctx.Array = new[] { 3.4, 5.6 };
-            o = EvalVisitor.Evaluate( "Array[0] + Array[1] ", ctx );
+            ctx.AnIntrinsicArray = new[] { 3.4, 5.6 };
+            o = ScriptEngine.Evaluate( "AnIntrinsicArray[0+0] + AnIntrinsicArray[1+0] ", ctx );
             Assert.That( o is JSEvalNumber );
             Assert.That( o.ToDouble(), Is.EqualTo( 3.4 + 5.6 ) );
         }
 
+
+        [TestCase( "typeof Ghost.M( 'any', Ghost.M[5+8], 'args' ) == 'number'" )]
+        [TestCase( "typeof Ghost.M( Ghost.M[5+8], Date(2015, 4, 23) ) == 'number'" )]
+        public void access_to_a_ghost_object_step_by_step( string s )
+        {
+            var ctx = new Context();
+            RuntimeObj syncResult = ScriptEngine.Evaluate( s, ctx );
+            Assert.That( syncResult is JSEvalBoolean && syncResult.ToBoolean() );
+
+            ScriptEngine engine = new ScriptEngine( ctx );
+            engine.Breakpoints.BreakAlways = true;
+            using( var r2 = engine.Execute( s ) )
+            {
+                int nbStep = 0;
+                while( r2.Status == ScriptEngineStatus.IsPending )
+                {
+                    ++nbStep;
+                    r2.Continue();
+                }
+                Assert.That( r2.Status, Is.EqualTo( ScriptEngineStatus.IsFinished ) );
+                Assert.That( new RuntimeObjComparer( r2.Result, syncResult ).AreEqualStrict( engine.Context ) );
+                Console.WriteLine( "String '{0}' = {1} evaluated in {2} steps.", s, syncResult.ToString(), nbStep );
+            }
+        }
     }
 }

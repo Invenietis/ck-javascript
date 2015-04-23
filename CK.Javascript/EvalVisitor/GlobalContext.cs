@@ -169,49 +169,52 @@ namespace CK.Javascript
         /// By overriding this any binding to to external objects can be achieved (recall to call this base
         /// method when overriding).
         /// </summary>
-        /// <param name="v">The vistitor.</param>
         /// <param name="frame">The current frame (gives access to the next frame if any).</param>
-        public virtual void Visit( IEvalVisitor v, IAccessorFrame frame )
+        public virtual PExpr Visit( IAccessorFrame frame )
         {
-            CallFunctionDescriptor f = frame.MatchCall( "Number", 1 );
-            if( f.IsValid )
-            {
-                if( f.Arguments.Count == 0 ) f.Frame.SetResult( Zero );
-                else f.Frame.SetResult( CreateNumber( f.Arguments[0] ) );
-            }
-            else if( (f = frame.MatchCall( "String", 1 )).IsValid )
-            {
-                if( f.Arguments.Count == 0 ) f.Frame.SetResult( EmptyString );
-                else f.Frame.SetResult( CreateString( f.Arguments[0] ) );
-            }
-            else if( (f = frame.MatchCall( "Boolean", 1 )).IsValid )
-            {
-                if( f.Arguments.Count == 0 ) f.Frame.SetResult( False );
-                else f.Frame.SetResult( CreateBoolean( f.Arguments[0] ) );
-            }
-            else if( (f = frame.MatchCall( "Date", 7 )).IsValid )
-            {
-                try
+            var s = frame.GetState( c =>
+                c.On( "Number" ).OnCall( 1, ( f, args ) =>
                 {
-                    int[] p = new int[7];
-                    for( int i = 0; i < f.Arguments.Count; ++i )
+                    if( args.Count == 0 ) return f.SetResult( Zero );
+                    return f.SetResult( CreateNumber( args[0] ) );
+                }
+                )
+                .On( "String" ).OnCall( 1, ( f, args ) =>
+                {
+                    if( args.Count == 0 ) return f.SetResult( EmptyString );
+                    return f.SetResult( CreateString( args[0] ) );
+
+                } )
+                .On( "Boolean" ).OnCall( 1, ( f, args ) =>
+                {
+                    if( args.Count == 0 ) return f.SetResult( False );
+                    return f.SetResult( CreateBoolean( args[0] ) );
+                } )
+                .On( "Date" ).OnCall( 7, ( f, args ) =>
+                {
+                    try
                     {
-                        p[i] = (int)f.Arguments[i].ToDouble();
-                        if( p[i] < 0 ) p[i] = 0;
+                        int[] p = new int[7];
+                        for( int i = 0; i < args.Count; ++i )
+                        {
+                            p[i] = (int)args[i].ToDouble();
+                            if( p[i] < 0 ) p[i] = 0;
+                        }
+                        if( p[0] > 9999 ) p[0] = 9999;
+                        if( p[1] < 1 ) p[1] = 1;
+                        else if( p[1] > 12 ) p[1] = 12;
+                        if( p[2] < 1 ) p[2] = 1;
+                        else if( p[2] > 31 ) p[2] = 31;
+                        DateTime d = new DateTime( p[0], p[1], p[2], p[3], p[4], p[5], p[6], DateTimeKind.Utc );
+                        return f.SetResult( CreateDateTime( d ) );
                     }
-                    if( p[0] > 9999 ) p[0] = 9999;
-                    if( p[1] < 1 ) p[1] = 1;
-                    else if( p[1] > 12 ) p[1] = 12;
-                    if( p[2] < 1 ) p[2] = 1;
-                    else if( p[2] > 31 ) p[2] = 31;
-                    DateTime d = new DateTime( p[0], p[1], p[2], p[3], p[4], p[5], p[6], DateTimeKind.Utc );
-                    f.Frame.SetResult( CreateDateTime( d ) );
-                }
-                catch( Exception ex )
-                {
-                    f.Frame.SetRuntimeError( ex.Message );
-                }
-            }
+                    catch( Exception ex )
+                    {
+                        return f.SetError( ex.Message );
+                    }
+                } )
+            );
+            return s != null ? s.Visit() : frame.SetError();
         }
     }
 

@@ -30,26 +30,16 @@ namespace CK.Javascript
 {
 
     /// <summary>
-    /// A <see cref="IExprVisitor{T}"/> where T is a <see cref="Expr"/> that is bound to a <see cref="GlobalContext"/>
-    /// and exposes a <see cref="Current"/> evaluation result object and/or a <see cref="CurrentError"/>.
+    /// A <see cref="IExprVisitor{T}"/> where T is a <see cref="PExpr"/> that is bound to a <see cref="GlobalContext"/>
+    /// and exposes a <see cref="CurrentResult"/> evaluation result object and/or a <see cref="CurrentError"/>.
     /// </summary>
-    public interface IEvalVisitor : IExprVisitor<Expr>
+    public interface IEvalVisitor : IExprVisitor<PExpr>
     {
         /// <summary>
         /// Gets the <see cref="GlobalContext"/> that will be used to obtain primitive 
-        /// objects (<see cref="RuntimeObj)"/> and resolve unbound accessors.
+        /// objects (<see cref="RuntimeObj)"/>) and resolve unbound accessors.
         /// </summary>
         GlobalContext Global { get; }
-
-        /// <summary>
-        /// Current evaluation result.
-        /// </summary>
-        RuntimeObj Current { get; }
-        
-        /// <summary>
-        /// Current error (null if no error occured).
-        /// </summary>
-        RuntimeError CurrentError { get; }
 
     }
 

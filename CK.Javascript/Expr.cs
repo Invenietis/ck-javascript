@@ -33,10 +33,13 @@ namespace CK.Javascript
 {
     public abstract class Expr
     {
-        protected Expr( SourceLocation location )
+        protected Expr( SourceLocation location, bool isbreakable = false )
         {
             Location = location;
+            IsBreakable = isbreakable;
         }
+
+        public readonly bool IsBreakable;
 
         public readonly SourceLocation Location;
 
@@ -45,7 +48,6 @@ namespace CK.Javascript
 
     public class SyntaxErrorExpr : Expr
     {
-        public static readonly SyntaxErrorExpr ReferenceErrorExpr = new SyntaxErrorExpr( SourceLocation.Empty, "Reference error." );
         public static readonly SyntaxErrorExpr ReservedErrorExpr = new SyntaxErrorExpr( SourceLocation.Empty, "Reserved." );
 
         public SyntaxErrorExpr( SourceLocation location, string errorMessageFormat, params object[] messageParameters )
@@ -55,11 +57,6 @@ namespace CK.Javascript
         }
 
         public string ErrorMessage { get; private set; }
-
-        public bool IsReferenceError
-        {
-            get { return this == ReferenceErrorExpr; }
-        }
 
         public bool IsReserved
         {
@@ -127,23 +124,41 @@ namespace CK.Javascript
         }
     }
 
+    /// <summary>
+    /// There are 3 type of concrete Accessors: <see cref="AccessorMemberExpr"/> for member access, <see cref="AccessorIndexerExpr"/>
+    /// that handles brackets with one and only one [expression] and <see cref="AccessorCallExpr"/> that handles calls with parens that 
+    /// contain zero or more arguments.
+    /// </summary>
     public abstract class AccessorExpr : Expr
     {
-        protected AccessorExpr( SourceLocation location, Expr left )
-            : base( location )
+        protected AccessorExpr( SourceLocation location, Expr left, bool isBreakable )
+            : base( location, isBreakable )
         {
-            if( left == null ) throw new ArgumentNullException( "left" );
             Left = left;
         }
 
+        /// <summary>
+        /// Gets the left expression.
+        /// It can be null: accessor chains are defined with other AccessorExpr and null signals an access to the context.
+        /// </summary>
         public Expr Left { get; private set; }
 
+        /// <summary>
+        /// Gets whether this accessor is a member name: only <see cref="AccessorMemberExpr"/>
+        /// overrides this to be able to return true if the name matches.
+        /// </summary>
+        /// <param name="memberName">Member name to challenge.</param>
+        /// <returns>True if this is an AccessorMemberExpr with the given name.</returns>
         public virtual bool IsMember( string memberName )
         {
             return false;
         }
 
-        public virtual IReadOnlyList<Expr> CallArguments
+        /// <summary>
+        /// Gets the argument list. This default implementation applies to specialized <see cref="AccessorMemberExpr"/>: 
+        /// a member (or field) is not callable.
+        /// </summary>
+        public virtual IReadOnlyList<Expr> Arguments
         {
             get { return null; }
         }
@@ -154,17 +169,17 @@ namespace CK.Javascript
         /// <summary>
         /// Creates a new <see cref="AccessorMemberExpr"/> for a field or a variable.
         /// </summary>
-        /// <param name="left">Left scope. Must not be null.</param>
+        /// <param name="left">Left scope. Can be null for unbound reference.</param>
         /// <param name="fieldOrVariableName">Field, variable or function name.</param>
         public AccessorMemberExpr( SourceLocation location, Expr left, string fieldOrVariableName )
-            : base( location, left )
+            : base( location, left, false )
         {
             Name = fieldOrVariableName;
         }
 
         public string Name { get; private set; }
 
-        public bool IsUnbound { get { return Left == SyntaxErrorExpr.ReferenceErrorExpr; } }
+        public bool IsUnbound { get { return Left == null; } }
 
         public override bool IsMember( string memberName )
         {
@@ -179,13 +194,15 @@ namespace CK.Javascript
 
         public override string ToString()
         {
-            return IsUnbound ? Name : Left.ToString() + '.' + Name;
+            return Left == null ? Name : Left.ToString() + '.' + Name;
         }
 
     }
 
     public class AccessorIndexerExpr : AccessorExpr
     {
+        CKReadOnlyListMono<Expr> _args;
+        
         /// <summary>
         /// Creates a new <see cref="AccessorIndexerExpr"/>. 
         /// One [Expr] is enough.
@@ -193,17 +210,28 @@ namespace CK.Javascript
         /// <param name="left">Left scope. Must not be null.</param>
         /// <param name="index">Index for the indexer.</param>
         public AccessorIndexerExpr( SourceLocation location, Expr left, Expr index )
-            : base( location, left )
+            : base( location, left, true )
         {
-            Index = index;
+            _args = new CKReadOnlyListMono<Expr>( index );
         }
 
-        public Expr Index { get; private set; }
+        /// <summary>
+        /// Gets the expression of the index.
+        /// </summary>
+        public Expr Index { get { return _args[0]; } }
 
         [DebuggerStepThrough]
         internal protected override T Accept<T>( IExprVisitor<T> visitor )
         {
             return visitor.Visit( this );
+        }
+
+        /// <summary>
+        /// Gets a one-sized argument list that contains the <see cref="Index"/>.
+        /// </summary>
+        public override IReadOnlyList<Expr> Arguments
+        {
+            get { return _args; }
         }
 
         public override string ToString()
@@ -223,12 +251,12 @@ namespace CK.Javascript
         /// <param name="left">Left scope. Must not be null.</param>
         /// <param name="arguments">When null, it is normalized to an empty list.</param>
         public AccessorCallExpr( SourceLocation location, Expr left, IReadOnlyList<Expr> arguments = null )
-            : base( location, left )
+            : base( location, left, true )
         {
             _args = arguments ?? CKReadOnlyListEmpty<Expr>.Empty;
         }
 
-        public override IReadOnlyList<Expr> CallArguments { get { return _args; } }
+        public override IReadOnlyList<Expr> Arguments { get { return _args; } }
 
         [DebuggerStepThrough]
         internal protected override T Accept<T>( IExprVisitor<T> visitor )
@@ -241,7 +269,7 @@ namespace CK.Javascript
             StringBuilder b = new StringBuilder( Left.ToString() );
             b.Append( '(' );
             bool first = true;
-            foreach( var e in CallArguments ) 
+            foreach( var e in Arguments ) 
             {
                 if( first ) first = false;
                 else b.Append( ',' );
@@ -255,7 +283,7 @@ namespace CK.Javascript
     public class BinaryExpr : Expr
     {
         public BinaryExpr( SourceLocation location, Expr left, JSTokeniserToken binaryOperatorToken, Expr right )
-            : base( location )
+            : base( location, true )
         {
             Left = left;
             BinaryOperatorToken = binaryOperatorToken;
@@ -283,7 +311,7 @@ namespace CK.Javascript
     public class IfExpr : Expr
     {
         public IfExpr( SourceLocation location, bool isTernary, Expr condition, Expr whenTrue, Expr whenFalse )
-            : base( location )
+            : base( location, true )
         {
             IsTernaryOperator = isTernary;
             Condition = condition;

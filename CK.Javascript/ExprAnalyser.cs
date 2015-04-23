@@ -153,7 +153,7 @@ namespace CK.Javascript
             if( id == "true" ) return new ConstantExpr( _parser.PrevNonCommentLocation, true );
             if( id == "false" ) return new ConstantExpr( _parser.PrevNonCommentLocation, false );
             
-            return new AccessorMemberExpr( _parser.PrevNonCommentLocation, _scope.Find( id ) ?? SyntaxErrorExpr.ReferenceErrorExpr, id );
+            return new AccessorMemberExpr( _parser.PrevNonCommentLocation, _scope.Find( id ), id );
         }
 
         Expr HandleUnaryExpr()

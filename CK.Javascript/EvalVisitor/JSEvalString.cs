@@ -79,15 +79,17 @@ namespace CK.Javascript
             throw new ArgumentException( "Must be a string.", "obj" );
         }
 
-        public override void Visit( IEvalVisitor v, IAccessorFrame frame )
+        public override PExpr Visit( IAccessorFrame frame )
         {
-            CallFunctionDescriptor f = frame.MatchCall( "charAt", 1 );
-            if( f.IsValid )
-            {
-                int idx = f.Arguments.Count > 0 ? JSSupport.ToInt32( f.Arguments[0].ToDouble() ) : 0;
-                if( idx < 0 || idx >= _value.Length ) f.Frame.SetResult( v.Global.EmptyString );
-                else f.Frame.SetResult( v.Global.CreateString( new String( _value[idx], 1 ) ) );
-            }
+            var s = frame.GetState( c => 
+                c.On( "charAt" ).OnCall( 1, ( f, args ) =>
+                {
+                    int idx = args.Count > 0 ? JSSupport.ToInt32( args[0].ToDouble() ) : 0;
+                    if( idx < 0 || idx >= _value.Length ) return f.SetResult( f.Global.EmptyString );
+                    return f.SetResult( f.Global.CreateString( new String( _value[idx], 1 ) ) );
+                }
+                ) );
+            return s != null ? s.Visit() : frame.SetError();
         }
 
     }

@@ -81,7 +81,7 @@ namespace CK.Javascript
             _b.Append( _exprPrefix );
             VisitExpr( e.Left );
             _b.Append( '(' );
-            e.CallArguments.Select( ( p, i ) => 
+            e.Arguments.Select( ( p, i ) => 
             { 
                 if( i > 0 ) _b.Append( ',' ); 
                 return VisitExpr( p ); 

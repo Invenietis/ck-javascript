@@ -62,18 +62,29 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="EvalVisitor\EvalVisitor.Expr.Accessors.cs" />
+    <Compile Include="EvalVisitor\EvalVisitor.Expr.Unary.cs" />
+    <Compile Include="EvalVisitor\EvalVisitor.Expr.If.cs" />
+    <Compile Include="EvalVisitor\EvalVisitor.Expr.Binary.cs" />
+    <Compile Include="EvalVisitor\EvalVisitor.NonBreakeableExpr.cs" />
+    <Compile Include="EvalVisitor\IAccessorFrameInitializer.cs" />
+    <Compile Include="EvalVisitor\IDeferedExpr.cs" />
+    <Compile Include="EvalVisitor\PExpr.cs" />
+    <Compile Include="ScriptEngine\BreakpointManager.cs" />
+    <Compile Include="EvalVisitor\EvalVisitor.Frame.cs" />
     <Compile Include="Expr.cs" />
     <Compile Include="ExprAnalyser.cs" />
     <Compile Include="ExprVisitor.cs" />
     <Compile Include="IExprVisitor.cs" />
     <Compile Include="ISyntaxicScope.cs" />
     <Compile Include="JSSupport.cs" />
-    <Compile Include="EvalVisitor\EvaluatorExtensions.cs" />
+    <Compile Include="ScriptEngine\IScriptEngineResult.cs" />
+    <Compile Include="ScriptEngine\ScriptEngine.EvaluationResult.cs" />
+    <Compile Include="ScriptEngine\ScriptEngine.cs" />
     <Compile Include="Tokeniser\JSTokeniser.cs" />
     <Compile Include="Tokeniser\JSTokeniserError.cs" />
     <Compile Include="Tokeniser\JSTokeniserToken.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EvalVisitor\AccessorFrame.cs" />
     <Compile Include="EvalVisitor\CallFunctionDescriptor.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.cs" />
     <Compile Include="EvalVisitor\GlobalContext.cs" />

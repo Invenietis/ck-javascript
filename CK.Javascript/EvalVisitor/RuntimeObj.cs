@@ -108,8 +108,9 @@ namespace CK.Javascript
             return this;
         }
 
-        public virtual void Visit( IEvalVisitor v, IAccessorFrame frame )
+        public virtual PExpr Visit( IAccessorFrame frame )
         {
+            return frame.SetError();
         }
 
     }

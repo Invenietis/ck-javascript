@@ -53,8 +53,8 @@ namespace CK.Javascript
         public virtual Expr Visit( AccessorCallExpr e )
         {
             var lV = VisitExpr( e.Left );
-            var aV = Visit( e.CallArguments );
-            return lV == e.Left && aV == e.CallArguments ? e : new AccessorCallExpr( e.Location, lV, aV );
+            var aV = Visit( e.Arguments );
+            return lV == e.Left && aV == e.Arguments ? e : new AccessorCallExpr( e.Location, lV, aV );
         }
 
         public IReadOnlyList<Expr> Visit( IReadOnlyList<Expr> args )

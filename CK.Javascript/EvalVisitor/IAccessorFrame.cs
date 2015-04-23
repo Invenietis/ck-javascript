@@ -31,61 +31,51 @@ namespace CK.Javascript
 {
 
     /// <summary>
-    /// Encapsulates chain of accessors. The <see cref=""/>
+    /// Encapsulates chain of accessors.
     /// </summary>
     public interface IAccessorFrame
     {
         /// <summary>
-        /// Gets the <see cref="Expr"/> of this frame.
+        /// Gets the <see cref="AccessorExpr"/> of this frame.
         /// </summary>
         AccessorExpr Expr { get; }
 
+        /// <summary>
+        /// Gets the global context.
+        /// </summary>
+        GlobalContext Global { get; }
+
+        /// <summary>
+        /// Initialize an accessor state based on a configuration. Returns null if no matching configuration have been found.
+        /// </summary>
+        /// <param name="configuration">Configuration of resolution handlers.</param>
+        /// <returns>Null if no matching configuration have been found.</returns>
+        IAccessorFrameState GetState( Action<IAccessorFrameInitializer> configuration );
+ 
         /// <summary>
         /// Gets the next accessor if any.
         /// </summary>
         IAccessorFrame NextAccessor { get; }
 
         /// <summary>
-        /// Sets the result for this frame.
+        /// Resolves this frame and returns a resolved promise.
         /// </summary>
-        /// <param name="result">The evaluated object.</param>
-        void SetResult( RuntimeObj result );
+        /// <param name="result">The evaluated resulting object.</param>
+        /// <returns>A resolved promise.</returns>
+        PExpr SetResult( RuntimeObj result );
 
         /// <summary>
-        /// Sets any error message if this frame can not be evaluated.
+        /// Resolves this frame with an error and returns a resolved promise.
         /// </summary>
-        /// <param name="message">Error message.</param>
-        void SetRuntimeError( string message );
+        /// <param name="message">
+        /// An optional error message. When let to null, a default message describing the error is generated ("unknown property 'f'." for example).
+        /// </param>
+        PExpr SetError( string message = null );
 
         /// <summary>
-        /// Gets whether this frame has been resolved.
+        /// Gets whether this frame has been resolved: either <see cref="SetError"/> or <see cref="SetResult"/> has been called.
         /// </summary>
-        bool HasResultOrError { get; }
-
-        /// <summary>
-        /// Returns <see cref="NextAccessor"/> if the <see cref="Expr"/> of this frame is 
-        /// an <see cref="AccessorMemberExpr"/> with the provided name, null otherwise.
-        /// </summary>
-        /// <param name="memberName">Member name.</param>
-        /// <returns>The <see cref="NextAccessor"/> or null.</returns>
-        IAccessorFrame MatchMember( string memberName );
-
-        /// <summary>
-        /// Always returns a <see cref="CallFunctionDescriptor"/>. <see cref="CallFunctionDescriptor.IsValid"/> is true
-        /// if the <see cref="Expr"/> of this frame is a function call.
-        /// The first <paramref name="maxParameterCount"/> arguments must be succesfully evaluated for <see cref="CallFunctionDescriptor.IsValid"/> to be true.
-        /// </summary>
-        /// <param name="functionName">The function name.</param>
-        /// <param name="maxParameterCount">The maximum numbers of parameters: use a negative value (-1) to evaluate all the arguments.</param>
-        /// <returns>A <see cref="CallFunctionDescriptor"/> that may not be valid.</returns>
-        CallFunctionDescriptor MatchCall( string functionName, int maxParameterCount = -1 );
-
-        /// <summary>
-        /// Evaluates <see cref="AccessorExpr.CallArguments"/> of <see cref="Expr"/> of this frame.
-        /// </summary>
-        /// <param name="maxCount">The numbers of parameters to evaluate: use a negative value (-1) to evaluate all the arguments.</param>
-        /// <returns></returns>
-        IReadOnlyList<RuntimeObj> EvalCallArguments( int maxCount = -1 );
+        bool IsResolved { get; }
 
     }
 
