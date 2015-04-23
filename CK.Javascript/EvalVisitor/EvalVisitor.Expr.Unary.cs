@@ -85,7 +85,7 @@ namespace CK.Javascript
                             }
                         default:
                             {
-                                result = new RuntimeError( Expr, "Unsupported unary operator: " + ((int)Expr.TokenType & 15) );
+                                result = new RuntimeError( Expr, "Unsupported unary operator: " + JSTokeniser.Explain( Expr.TokenType ) );
                                 break;
                             }
                     }

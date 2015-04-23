@@ -36,7 +36,7 @@ namespace CK.Javascript
         /// This is a basic frame object that captures an evaluation step. 
         /// The "stack" is implemented with links to a previous and next frames.
         /// </summary>
-        protected abstract class Frame : IDeferedExpr, IDisposable
+        protected abstract class Frame : IDeferredExpr, IDisposable
         {          
             internal readonly EvalVisitor _visitor;
             readonly Expr _expr;
@@ -102,7 +102,15 @@ namespace CK.Javascript
             {
                 if( current.IsResolved ) return current;
                 if( current.IsUnknown ) return _visitor.VisitExpr( e );
-                return current.Defered.StepOut();
+                return current.Deferred.StepOut();
+            }
+
+            public bool IsPendingOrError( ref PExpr current, Expr e )
+            {
+                if( current.IsResolved ) return false;
+                if( current.IsUnknown ) current = _visitor.VisitExpr( e );
+                else current = current.Deferred.StepOut();
+                return current.IsPendingOrError;
             }
 
             public virtual PExpr SetResult( RuntimeObj result )

@@ -68,8 +68,9 @@
     <Compile Include="EvalVisitor\EvalVisitor.Expr.Binary.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.NonBreakeableExpr.cs" />
     <Compile Include="EvalVisitor\IAccessorFrameInitializer.cs" />
-    <Compile Include="EvalVisitor\IDeferedExpr.cs" />
+    <Compile Include="EvalVisitor\IDeferredExpr.cs" />
     <Compile Include="EvalVisitor\PExpr.cs" />
+    <Compile Include="EvalVisitor\RefRuntimeObj.cs" />
     <Compile Include="ScriptEngine\BreakpointManager.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Frame.cs" />
     <Compile Include="Expr.cs" />

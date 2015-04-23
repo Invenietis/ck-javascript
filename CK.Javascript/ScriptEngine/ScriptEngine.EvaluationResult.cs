@@ -19,7 +19,7 @@ namespace CK.Javascript
             RuntimeError _error;
             ScriptEngineStatus _status;
 
-            class FrameStack : ObservableCollection<IDeferedExpr>, IObservableReadOnlyList<IDeferedExpr> {}
+            class FrameStack : ObservableCollection<IDeferredExpr>, IObservableReadOnlyList<IDeferredExpr> {}
             FrameStack _frameStack;
 
 
@@ -63,7 +63,7 @@ namespace CK.Javascript
                 else _status |= ScriptEngineStatus.IsFinished;
             }
 
-            public IObservableReadOnlyList<IDeferedExpr> EnsureFrameStack()
+            public IObservableReadOnlyList<IDeferredExpr> EnsureFrameStack()
             {
                 if( _frameStack == null )
                 {

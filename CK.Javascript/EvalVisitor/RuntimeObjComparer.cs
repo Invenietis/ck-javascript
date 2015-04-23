@@ -119,7 +119,7 @@ namespace CK.Javascript
             {
                 result = cmp.CompareTo( Y );
             }
-            else
+            else if( X.Type == RuntimeObj.TypeNumber || Y.Type == RuntimeObj.TypeNumber )
             {
                 Double xD = X.ToDouble();
                 Double yD = Y.ToDouble();
@@ -127,6 +127,7 @@ namespace CK.Javascript
                 if( xD < yD ) result = -1;
                 else if( xD > yD ) result = 1;
             }
+            else return false;
             if( Swapped ) result = -result;
             return true;
         }

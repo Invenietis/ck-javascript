@@ -54,17 +54,17 @@ namespace CK.Javascript
             return e.Accept( this );
         }
 
-        public IDeferedExpr CurrentFrame
+        public IDeferredExpr CurrentFrame
         {
             get { return _currentFrame; }
         }
 
-        public IDeferedExpr FirstFrame
+        public IDeferredExpr FirstFrame
         {
             get { return _firstFrame; }
         }
 
-        public IEnumerable<IDeferedExpr> Frames
+        public IEnumerable<IDeferredExpr> Frames
         {
             get 
             { 

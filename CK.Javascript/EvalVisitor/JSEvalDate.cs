@@ -60,7 +60,12 @@ namespace CK.Javascript
 
         public override string ToString()
         {
-            return JSSupport.ToString( _value ); ;
+            return JSSupport.ToString( _value );
+        }
+
+        public override RuntimeObj ToPrimitive( GlobalContext c )
+        {
+            return c.CreateString( JSSupport.ToString( _value ) );
         }
 
         public override bool Equals( object obj )
@@ -82,6 +87,18 @@ namespace CK.Javascript
             if( obj is DateTime ) return _value.CompareTo( (DateTime)obj );
             throw new ArgumentException( "Must be a Date.", "obj" );
         }
+
+        public override PExpr Visit( IAccessorFrame frame )
+        {
+            var s = frame.GetState( c =>
+                c.On( "toString" ).OnCall( 0, ( f, args ) =>
+                {
+                    return f.SetResult( f.Global.CreateString( JSSupport.ToString( _value ) ) );
+                }
+                ) );
+            return s != null ? s.Visit() : frame.SetError();
+        }
+
     }
 
 

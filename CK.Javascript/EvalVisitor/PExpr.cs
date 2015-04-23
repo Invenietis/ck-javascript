@@ -12,10 +12,10 @@ namespace CK.Javascript
     /// </summary>
     public struct PExpr
     {
-        public readonly IDeferedExpr Defered;
+        public readonly IDeferredExpr Deferred;
         public readonly RuntimeObj Result;
 
-        public PExpr( IDeferedExpr pending )
+        public PExpr( IDeferredExpr pending )
             : this( pending, null )
         {
         }
@@ -25,27 +25,27 @@ namespace CK.Javascript
         {
         }
 
-        PExpr( IDeferedExpr pending, RuntimeObj resultOrError )
+        PExpr( IDeferredExpr pending, RuntimeObj resultOrError )
         {
-            Defered = pending;
+            Deferred = pending;
             Result = resultOrError;
         }
 
-        public bool IsUnknown { get { return Result == null && Defered == null; } }
+        public bool IsUnknown { get { return Result == null && Deferred == null; } }
 
         public bool IsErrorResult { get { return Result is RuntimeError; } }
 
-        public bool IsPending { get { return Defered != null; } }
+        public bool IsPending { get { return Deferred != null; } }
         
         public bool IsResolved { get { return Result != null; } }
 
-        public bool IsPendingOrError { get { return Defered != null || IsErrorResult; } }
+        public bool IsPendingOrError { get { return Deferred != null || IsErrorResult; } }
 
         public bool IsValidResult { get { return Result != null && !IsErrorResult; } }
 
         public override string ToString()
         {
-            string sP = Defered != null ? String.Format( "Defered = {0}", Defered.Expr ) : null;
+            string sP = Deferred != null ? String.Format( "Deferred = {0}", Deferred.Expr ) : null;
             string sR = Result != null ? String.Format( "Result = {0}", Result ) : null;
             if( sP == null ) return sR != null ? sR : "(Unknown)";
             if( sR == null ) return sP;

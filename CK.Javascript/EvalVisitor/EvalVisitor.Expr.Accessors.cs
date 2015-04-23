@@ -42,7 +42,7 @@ namespace CK.Javascript
     {
         class AccessorFrame : Frame<AccessorExpr>, IAccessorFrame
         {
-            class FrameState : IAccessorFrameState
+            class FrameState : IAccessorFrameState, IReadOnlyList<RuntimeObj>
             {
                 readonly AccessorFrame _winner;
                 readonly Func<IAccessorFrame, RuntimeObj, PExpr> _indexCode;
@@ -66,13 +66,35 @@ namespace CK.Javascript
                     _winner._initCount = 0;
                     while( _rpCount < _args.Length )
                     {
-                        if( (_args[_rpCount] = _winner.Resolve( _args[_rpCount], _winner.Expr.Arguments[_rpCount] )).IsPendingOrError ) return _winner.PendingOrError( _args[_rpCount] );
+                        if( _winner.IsPendingOrError( ref _args[_rpCount], _winner.Expr.Arguments[_rpCount] ) ) return _winner.PendingOrError( _args[_rpCount] );
                         ++_rpCount;
                     }
-                    var r = _indexCode != null ? _indexCode( _winner, _args[0].Result ) : _callCode( _winner, _args.Select( e => e.Result ).ToReadOnlyList() );
-                    if( !r.IsResolved && r.Defered != _winner ) throw new CKException( "Implementations must call either SetResult, SetError or PendigOrError frame's method." );
+                    var r = _indexCode != null ? _indexCode( _winner, _args[0].Result ) : _callCode( _winner, this );
+                    if( !r.IsResolved && r.Deferred != _winner ) throw new CKException( "Implementations must call either SetResult, SetError or PendigOrError frame's method." );
                     return r;
                 }
+
+                #region Auto implemented access to resolved arguments (avoid an allocation).
+                RuntimeObj IReadOnlyList<RuntimeObj>.this[int index]
+                {
+                    get { return _args[index].Result; }
+                }
+
+                int IReadOnlyCollection<RuntimeObj>.Count
+                {
+                    get { return _args.Length; }
+                }
+
+                IEnumerator<RuntimeObj> IEnumerable<RuntimeObj>.GetEnumerator()
+                {
+                    return _args.Select( e => e.Result ).GetEnumerator();
+                }
+
+                System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+                {
+                    return ((IEnumerable<RuntimeObj>)this).GetEnumerator();
+                }
+                #endregion
             }
 
             class FrameInitializer : IAccessorFrameInitializer
@@ -187,7 +209,6 @@ namespace CK.Javascript
                 get { return base.Expr; } 
             }
 
-
             protected PExpr ReentrantPendingOrError( PExpr sub )
             {
                 Debug.Assert( sub.IsPendingOrError );
@@ -237,13 +258,13 @@ namespace CK.Javascript
                     }
                     else
                     {
-                        if( (_left = Resolve( _left, Expr.Left )).IsPendingOrError ) return ReentrantPendingOrError( _left );
+                        if( IsPendingOrError( ref _left, Expr.Left ) ) return ReentrantPendingOrError( _left );
                     }
                 }
                 if( Result != null ) return new PExpr( Result );
 
                 Debug.Assert( !_result.IsResolved );
-                if( (_result = _left.Result.Visit( this )).IsPendingOrError ) return ReentrantPendingOrError( _left );
+                if( (_result = _left.Result.Visit( this )).IsPendingOrError ) return ReentrantPendingOrError( _result );
                 return ReentrantSetResult( _result.Result );
             }
 

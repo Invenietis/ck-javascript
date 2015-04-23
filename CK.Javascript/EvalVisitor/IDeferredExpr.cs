@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CK.Javascript
 {
-    public interface IDeferedExpr
+    public interface IDeferredExpr
     {
         /// <summary>
         /// Gets the expression.
@@ -14,7 +14,7 @@ namespace CK.Javascript
         Expr Expr { get; }
 
         /// <summary>
-        /// Gets the resolved result. Null until this defered is resolved.
+        /// Gets the resolved result. Null until this deffered is resolved.
         /// </summary>
         RuntimeObj Result { get; }
 
