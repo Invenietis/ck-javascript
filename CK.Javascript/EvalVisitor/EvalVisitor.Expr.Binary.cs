@@ -46,7 +46,7 @@ namespace CK.Javascript
 
             protected override PExpr DoVisit()
             {
-                if( (_left = Resolve( _left, Expr.Left )).IsPendingOrError ) return PendingOrError( _left );
+                if( IsPendingOrError( ref _left, Expr.Left ) ) return PendingOrError( _left );
 
                 // Do not evaluate right expression if it is useless: short-circuit boolean evaluation.
                 if( (Expr.BinaryOperatorToken == JSTokeniserToken.And && !_left.Result.ToBoolean())
@@ -55,11 +55,12 @@ namespace CK.Javascript
                     return SetResult( _left.Result );
                 }
 
-                if( (_right = Resolve( _right, Expr.Right )).IsPendingOrError ) return PendingOrError( _right );
+                if( IsPendingOrError( ref _right, Expr.Right ) ) return PendingOrError( _right );
 
                 RuntimeObj left = _left.Result;
                 RuntimeObj right = _right.Result;
 
+                // Right value is the result for And and Or.
                 RuntimeObj result = right;
 
                 if( Expr.BinaryOperatorToken != JSTokeniserToken.And && Expr.BinaryOperatorToken != JSTokeniserToken.Or )

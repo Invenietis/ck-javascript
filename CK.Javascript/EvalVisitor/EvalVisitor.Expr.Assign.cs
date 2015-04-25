@@ -34,28 +34,30 @@ namespace CK.Javascript
 
     public partial class EvalVisitor
     {
-        public PExpr Visit( ConstantExpr e )
+        class AssignExprFrame : Frame<AssignExpr>
         {
-            if( e.Value == null || e.Value is string ) return new PExpr( _global.CreateString( (string)e.Value ) );
-            if( e == ConstantExpr.UndefinedExpr ) return new PExpr( RuntimeObj.Undefined );
-            if( e.Value is Double ) return new PExpr( _global.CreateNumber( (Double)e.Value ) );
-            if( e.Value is Boolean ) return new PExpr( _global.CreateBoolean( (Boolean)e.Value ) );
-            return new PExpr( new RuntimeError( e, "Unsupported JS type: " + e.Value.GetType().Name ) );
+            PExpr _left;
+            PExpr _right;
+
+            public AssignExprFrame( EvalVisitor evaluator, AssignExpr e )
+                : base( evaluator, e )
+            {
+            }
+
+            protected override PExpr DoVisit()
+            {
+                if( IsPendingOrError( ref _left, Expr.Left ) ) return PendingOrError( _left );
+                if( IsPendingOrError( ref _right, Expr.Right ) ) return PendingOrError( _right );
+                RefRuntimeObj r = _left.Result as RefRuntimeObj;
+                if( r == null ) return SetResult( Global.CreateRuntimeError( Expr.Left, "Invalid assignment left-hand side." ) );
+                r.Value = _right.Result;
+                return SetResult( _right.Result );
+            }
         }
 
-        public PExpr Visit( SyntaxErrorExpr e )
+        public PExpr Visit( AssignExpr e )
         {
-            return new PExpr( _global.CreateRuntimeError( e, e.ErrorMessage ) );
-        }
-
-        public PExpr Visit( AccessorDeclVarExpr e )
-        {
-            return new PExpr( _dynamicScope.FindRegistered( e ) );
-        }
-
-        public PExpr Visit( NopExpr e )
-        {
-            return new PExpr( RuntimeObj.Undefined );
+            using( var f = new AssignExprFrame( this, e ) ) return f.Visit();
         }
 
     }

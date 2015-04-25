@@ -62,20 +62,32 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analyser\Expressions\ListOfExpr.cs" />
+    <Compile Include="Analyser\Expressions\WhileExpr.cs" />
+    <Compile Include="Analyser\Expressions\PrePostIncDecExpr.cs" />
     <Compile Include="Analyser\Expressions\Expr.cs" />
     <Compile Include="Analyser\Expressions\BlockExpr.cs" />
+    <Compile Include="Analyser\Expressions\AssignExpr.cs" />
+    <Compile Include="Analyser\Expressions\NopExpr.cs" />
     <Compile Include="Analyser\Expressions\SyntaxErrorExpr.cs" />
     <Compile Include="Analyser\Expressions\ConstantExpr.cs" />
     <Compile Include="Analyser\Expressions\AccessorExpr.cs" />
     <Compile Include="Analyser\Expressions\BinaryExpr.cs" />
     <Compile Include="Analyser\Expressions\UnaryExpr.cs" />
+    <Compile Include="Analyser\StaticScope.cs" />
+    <Compile Include="EvalVisitor\DynamicScope.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.Accessors.cs" />
+    <Compile Include="EvalVisitor\EvalVisitor.Expr.ListOf.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.Block.cs" />
+    <Compile Include="EvalVisitor\EvalVisitor.Expr.Assign.cs" />
+    <Compile Include="EvalVisitor\EvalVisitor.Expr.While.cs" />
+    <Compile Include="EvalVisitor\EvalVisitor.Expr.PrePostIncDec.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.Unary.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.If.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.Binary.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.NonBreakeableExpr.cs" />
     <Compile Include="EvalVisitor\IAccessorFrameInitializer.cs" />
+    <Compile Include="EvalVisitor\IAccessorFrameState.cs" />
     <Compile Include="EvalVisitor\IDeferredExpr.cs" />
     <Compile Include="EvalVisitor\PExpr.cs" />
     <Compile Include="EvalVisitor\RefRuntimeObj.cs" />
@@ -85,7 +97,6 @@
     <Compile Include="Analyser\ExprAnalyser.cs" />
     <Compile Include="Analyser\ExprVisitor.cs" />
     <Compile Include="Analyser\IExprVisitor.cs" />
-    <Compile Include="Analyser\ISyntaxicScope.cs" />
     <Compile Include="JSSupport.cs" />
     <Compile Include="ScriptEngine\IScriptEngineResult.cs" />
     <Compile Include="ScriptEngine\ScriptEngine.EvaluationResult.cs" />
@@ -109,7 +120,6 @@
     <Compile Include="EvalVisitor\RuntimeObjComparer.cs" />
     <Compile Include="Tokeniser\SourceLocation.cs" />
     <Compile Include="Analyser\SyntaxErrorCollector.cs" />
-    <Compile Include="Analyser\SyntaxicScope.cs" />
     <Compile Include="ToStringVisitor.cs" />
   </ItemGroup>
   <ItemGroup>

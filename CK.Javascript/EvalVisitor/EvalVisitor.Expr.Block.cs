@@ -34,25 +34,28 @@ namespace CK.Javascript
 
     public partial class EvalVisitor
     {
-        class BlockExprFrame : Frame<BlockExpr>
+        class BlockExprFrame : ListOfExprFrame
         {
-            readonly PExpr[] _statements;
-            int _sCount;
-
             public BlockExprFrame( EvalVisitor evaluator, BlockExpr e )
                 : base( evaluator, e )
             {
-                _statements = new PExpr[e.Statements.Count];
             }
 
             protected override PExpr DoVisit()
             {
-                while( _sCount < _statements.Length )
+                foreach( var local in ((BlockExpr)Expr).Locals )
                 {
-                    if( IsPendingOrError( ref _statements[_sCount], Expr.Statements[_sCount] ) ) return PendingOrError( _statements[_sCount] );
-                    ++_sCount;
+                    _visitor._dynamicScope.Register( local );
                 }
-                return SetResult( _statements[_sCount-1].Result );
+                return base.DoVisit();
+            }
+
+            protected override void OnDispose()
+            {
+                foreach( var local in ((BlockExpr)Expr).Locals )
+                {
+                    _visitor._dynamicScope.Unregister( local );
+                }
             }
         }
 

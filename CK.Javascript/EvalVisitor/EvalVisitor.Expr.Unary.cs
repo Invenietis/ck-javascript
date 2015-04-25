@@ -44,7 +44,7 @@ namespace CK.Javascript
 
             protected override PExpr DoVisit()
             {
-                if( (_expression = Resolve( _expression, Expr.Expression )).IsPendingOrError ) return PendingOrError( _expression );
+                if( IsPendingOrError( ref _expression, Expr.Expression ) ) return PendingOrError( _expression );
 
                 RuntimeObj result = _expression.Result;
                 // Minus and Plus are classified as a binary operator.

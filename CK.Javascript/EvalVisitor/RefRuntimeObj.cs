@@ -44,11 +44,11 @@ namespace CK.Javascript
             get { return _value; }
             set 
             {
-                if( value == null ) _value = Null;
+                if( value == null ) _value = RuntimeObj.Null;
                 else 
                 {
                     var r = value as RefRuntimeObj;
-                    _value = r != null ? r.Value : _value;
+                    _value = r != null ? r.Value : value;
                 }
             }
         }
@@ -68,6 +68,16 @@ namespace CK.Javascript
             return _value.ToDouble();
         }
 
+        /// <summary>
+        /// Overridden to return this <see cref="Value"/>.
+        /// </summary>
+        /// <returns>This Value.</returns>
+        public override RuntimeObj ToValue()
+        {
+            return _value;
+        }
+
+
         public override RuntimeObj ToPrimitive( GlobalContext c )
         {
             return _value.ToPrimitive( c );
@@ -75,7 +85,7 @@ namespace CK.Javascript
 
         public override PExpr Visit( IAccessorFrame frame )
         {
-            return _value.Visit( frame );
+            return new PExpr( this );
         }
     }
 

@@ -34,28 +34,32 @@ namespace CK.Javascript
 
     public partial class EvalVisitor
     {
-        public PExpr Visit( ConstantExpr e )
+        class PrePostIncDecExprFrame : Frame<PrePostIncDecExpr>
         {
-            if( e.Value == null || e.Value is string ) return new PExpr( _global.CreateString( (string)e.Value ) );
-            if( e == ConstantExpr.UndefinedExpr ) return new PExpr( RuntimeObj.Undefined );
-            if( e.Value is Double ) return new PExpr( _global.CreateNumber( (Double)e.Value ) );
-            if( e.Value is Boolean ) return new PExpr( _global.CreateBoolean( (Boolean)e.Value ) );
-            return new PExpr( new RuntimeError( e, "Unsupported JS type: " + e.Value.GetType().Name ) );
+            PExpr _operand;
+
+            public PrePostIncDecExprFrame( EvalVisitor evaluator, PrePostIncDecExpr e )
+                : base( evaluator, e )
+            {
+            }
+
+            protected override PExpr DoVisit()
+            {
+                if( IsPendingOrError( ref _operand, Expr.Operand ) ) return PendingOrError( _operand );
+                RefRuntimeObj r = _operand.Result as RefRuntimeObj;
+                if( r == null ) return SetResult( Global.CreateRuntimeError( Expr.Operand, "Invalid increment or decrement operand." ) );
+                
+                var newValue = Global.CreateNumber( _operand.Result.ToDouble() + (Expr.Plus ? 1.0 : -1.0) );
+                if( Expr.Prefix ) return SetResult( (r.Value = newValue) );
+                var result = SetResult( r.Value );
+                r.Value = newValue;
+                return result;
+            }
         }
 
-        public PExpr Visit( SyntaxErrorExpr e )
+        public PExpr Visit( PrePostIncDecExpr e )
         {
-            return new PExpr( _global.CreateRuntimeError( e, e.ErrorMessage ) );
-        }
-
-        public PExpr Visit( AccessorDeclVarExpr e )
-        {
-            return new PExpr( _dynamicScope.FindRegistered( e ) );
-        }
-
-        public PExpr Visit( NopExpr e )
-        {
-            return new PExpr( RuntimeObj.Undefined );
+            using( var f = new PrePostIncDecExprFrame( this, e ) ) return f.Visit();
         }
 
     }

@@ -108,10 +108,47 @@ namespace CK.Javascript
             return e;
         }
 
+        public virtual Expr Visit( ListOfExpr e )
+        {
+            var lV = Visit( e.List );
+            return lV == e.List ? e : new ListOfExpr( lV );
+        }
+
         public virtual Expr Visit( BlockExpr e )
         {
-            var sV = Visit( e.Statements );
-            return sV == e.Statements ? e : new BlockExpr( e.Location, sV );
+            var sV = Visit( e.List );
+            var lV = (IReadOnlyList<AccessorDeclVarExpr>)Visit( e.Locals );
+            return sV == e.List && lV == e.Locals ? e : new BlockExpr( sV, lV );
+        }
+
+        public virtual Expr Visit( AssignExpr e )
+        {
+            var lV = (AccessorMemberExpr)VisitExpr( e.Left );
+            var rV = VisitExpr( e.Right );
+            return lV == e.Left && rV == e.Right ? e : new AssignExpr( e.Location, lV, rV );
+        }
+
+        public virtual Expr Visit( AccessorDeclVarExpr e )
+        {
+            return e;
+        }
+
+        public virtual Expr Visit( NopExpr e )
+        {
+            return e;
+        }
+
+        public virtual Expr Visit( PrePostIncDecExpr e )
+        {
+            var oV = VisitExpr( e.Operand );
+            return oV == e.Operand ? e : new PrePostIncDecExpr( e.Location, (AccessorExpr)oV, e.Plus, e.Prefix );
+        }
+
+        public virtual Expr Visit( WhileExpr e )
+        {
+            var cV = VisitExpr( e.Condition );
+            var oV = VisitExpr( e.Code );
+            return cV == e.Condition && oV == e.Code ? e : new WhileExpr( e.Location, cV, oV );
         }
 
     }

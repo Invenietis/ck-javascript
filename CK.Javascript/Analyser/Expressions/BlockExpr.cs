@@ -31,16 +31,16 @@ using System.Diagnostics;
 
 namespace CK.Javascript
 {
-    public class BlockExpr : Expr
+    public class BlockExpr : ListOfExpr
     {
-        public BlockExpr( SourceLocation location, IReadOnlyList<Expr> statements )
-            : base( location, false )
+        public BlockExpr( IReadOnlyList<Expr> statements, IReadOnlyList<AccessorDeclVarExpr> locals )
+            : base( statements )
         {
-            if( statements == null ) throw new ArgumentNullException();
-            Statements = statements;
+            if( locals == null ) throw new ArgumentNullException( "locals" );
+            Locals = locals;
         }
 
-        public IReadOnlyList<Expr> Statements { get; private set; }
+        public IReadOnlyList<AccessorDeclVarExpr> Locals { get; private set; }
 
         [DebuggerStepThrough]
         internal protected override T Accept<T>( IExprVisitor<T> visitor )
@@ -50,9 +50,8 @@ namespace CK.Javascript
 
         public override string ToString()
         {
-            return '{' + String.Join( " ", Statements.Select( s => s.ToString() ) ) + '}';
+            return '{' + String.Join( " ", List.Select( s => s.ToString() ) ) + '}';
         }
-
     }
 
 

@@ -41,6 +41,12 @@ namespace CK.Javascript
         T Visit( IfExpr e );
         T Visit( SyntaxErrorExpr e );
         T Visit( UnaryExpr e );
+        T Visit( ListOfExpr e );
         T Visit( BlockExpr e );
+        T Visit( AssignExpr e );
+        T Visit( AccessorDeclVarExpr e );
+        T Visit( NopExpr e );
+        T Visit( PrePostIncDecExpr e );
+        T Visit( WhileExpr e );
     }
 }

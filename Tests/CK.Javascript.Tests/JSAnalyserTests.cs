@@ -37,7 +37,7 @@ namespace CK.Javascript.Tests
         [Test]
         public void EmptyParsing()
         {
-            ExprAnalyser a = new ExprAnalyser( new StaticSyntaxicScope() );
+            ExprAnalyser a = new ExprAnalyser();
             JSTokeniser p = new JSTokeniser();
             {
                 p.Reset( "" );
@@ -56,7 +56,7 @@ namespace CK.Javascript.Tests
         [Test]
         public void BadNumbers()
         {
-            ExprAnalyser a = new ExprAnalyser( new StaticSyntaxicScope() );
+            ExprAnalyser a = new ExprAnalyser();
             JSTokeniser p = new JSTokeniser();
 
             {
@@ -102,7 +102,7 @@ namespace CK.Javascript.Tests
             JSTokeniser p = new JSTokeniser();
             Assert.That( JSTokeniser.Explain( JSTokeniserToken.Integer ), Is.EqualTo( "42" ) );
 
-            string s = " function ( x , z ) { if ( x != z || x && z % x - x >>> z >> z << x | z & x ^ z -- = x ++ ) return x + ( z * 42 ) / 42 ; } void == typeof += new -= delete >>= instanceof >>>= x % z %= x === z !== x ! z ~= x |= z &= x <<= z ^= x /= z *= x %=";
+            string s = " function ( x , z ) ++ -- { if ( x != z || x && z % x - x >>> z >> z << x | z & x ^ z -- = x ++ ) return x + ( z * 42 ) / 42 ; } void == typeof += new -= delete >>= instanceof >>>= x % z %= x === z !== x ! z ~ = x |= z &= x <<= z ^= x /= z *= x %=";
             p.Reset( s );
             string recompose = "";
             while( !p.IsEndOfInput )
@@ -122,13 +122,13 @@ namespace CK.Javascript.Tests
         [Test]
         public void SimpleExpression()
         {
-            ExprAnalyser a = new ExprAnalyser( new StaticSyntaxicScope() );
+            ExprAnalyser a = new ExprAnalyser();
             JSTokeniser p = new JSTokeniser();
 
             {
                 p.Reset( "value" );
                 Assert.That( p.IsErrorOrEndOfInput, Is.False );
-                Expr e = a.Analyse( p );
+                 Expr e = a.Analyse( p );
                 Assert.That( e is AccessorMemberExpr );
                 AccessorMemberExpr ac = e as AccessorMemberExpr;
                 Assert.That( ac.IsUnbound == true );
@@ -212,7 +212,7 @@ namespace CK.Javascript.Tests
         [Test]
         public void ArraySupport()
         {
-            ExprAnalyser a = new ExprAnalyser( new StaticSyntaxicScope() );
+            ExprAnalyser a = new ExprAnalyser();
             JSTokeniser p = new JSTokeniser();
             {
                 p.Reset( "a[9]" );

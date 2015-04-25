@@ -326,12 +326,32 @@ namespace CK.Javascript
             get { return _prevCharPosTokenEnd; }
         }
 
-        static string[] _assignOperator = { "=", "~=", "|=", "&=", "<<=", "^=", ">>=", ">>>=", "+=", "-=", "/=", "*=", "%=" };
-        static string[] _binaryOperator = { "|", "^", "&", ">>", "<<", ">>>", "+", "-", "/", "*", "%", "instanceof" };
+        static string[] _binaryOperator = { "instanceof", "|",  "&",  "<<",  "^",  ">>",  ">>>",  "+",  "-",  "/",  "*",  "%",  };
+        static string[] _assignOperator = { "=",          "|=", "&=", "<<=", "^=", ">>=", ">>>=", "+=", "-=", "/=", "*=", "%=" };
         static string[] _compareOperator = { "==", "<", ">", "<=", ">=", "!=", "===", "!==" };
         static string[] _punctuations = { ".", ",", "?", ":", ";" };
         static string[] _specialIdentifiers = { "delete", "new", "typeof", "void" };
         static string[] _unaryOperator = { "!", "~", "--", "++", "delete", "new", "typeof", "void" };
+        static JSTokeniserToken[] _assignBinaryMap = 
+        { 
+            JSTokeniserToken.BitwiseOr, 
+            JSTokeniserToken.BitwiseAnd, 
+            JSTokeniserToken.BitwiseShiftLeft, 
+            JSTokeniserToken.BitwiseXOr,
+            JSTokeniserToken.BitwiseShiftRight,
+            JSTokeniserToken.BitwiseShiftRightNoSignBit,
+            JSTokeniserToken.Plus,
+            JSTokeniserToken.Minus,
+            JSTokeniserToken.Divide,
+            JSTokeniserToken.Mult,
+            JSTokeniserToken.Modulo
+        };
+
+        static internal JSTokeniserToken FromAssignOperatorToBinary( JSTokeniserToken assignment )
+        {
+            Debug.Assert( (assignment & JSTokeniserToken.IsAssignOperator) != 0 && assignment != JSTokeniserToken.Assign );
+            return _assignBinaryMap[((int)assignment & 15)-2];
+        }
 
         public static string Explain( JSTokeniserToken t )
         {
@@ -348,6 +368,8 @@ namespace CK.Javascript
             if( t == JSTokeniserToken.Identifier ) return "identifier";
             if( t == JSTokeniserToken.And ) return "&&";
             if( t == JSTokeniserToken.Or ) return "||";
+            if( t == JSTokeniserToken.PlusPlus ) return "++";
+            if( t == JSTokeniserToken.MinusMinus ) return "--";
             
             if( t == JSTokeniserToken.String ) return "\"string\"";
 
@@ -849,7 +871,6 @@ namespace CK.Javascript
                     if( Read( '=' ) ) return (int)JSTokeniserToken.ModuloAssign;
                     return (int)JSTokeniserToken.Modulo;
                 case '~':
-                    if( Read( '=' ) ) return (int)JSTokeniserToken.BitwiseNotAssign;
                     return (int)JSTokeniserToken.BitwiseNot;
                 default:
                     {
@@ -1056,5 +1077,9 @@ namespace CK.Javascript
             return (int)JSTokeniserToken.Identifier;
         }
 
+        public override string ToString()
+        {
+            return "CurrentToken = " + Explain( CurrentToken );
+        }
     }
 }

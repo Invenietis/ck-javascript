@@ -57,7 +57,7 @@ namespace CK.Javascript
             _b.Append( _exprPrefix );
             if( e.IsUnbound )
             {
-                _b.Append( StaticSyntaxicScope.RootScopeName );
+                _b.Append( "[[Global]]" );
             }
             else VisitExpr( e.Left );
             _b.Append( '.' ).Append( e.Name );

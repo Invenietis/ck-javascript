@@ -47,17 +47,17 @@ namespace CK.Javascript
 
             protected override PExpr DoVisit()
             {
-                if( (_condition = Resolve( _condition, Expr.Condition )).IsPendingOrError ) return PendingOrError( _condition );
+                if( IsPendingOrError( ref _condition, Expr.Condition ) ) return PendingOrError( _condition );
 
                 if( _condition.Result.ToBoolean() )
                 {
-                    if( (_whenTrue = Resolve( _whenTrue, Expr.WhenTrue )).IsPendingOrError ) return PendingOrError( _whenTrue );
+                    if( IsPendingOrError( ref _whenTrue, Expr.WhenTrue ) ) return PendingOrError( _whenTrue );
                     return SetResult( _whenTrue.Result );
                 }
 
                 if( Expr.WhenFalse != null )
                 {
-                    if( (_whenFalse = Resolve( _whenFalse, Expr.WhenFalse )).IsPendingOrError ) return PendingOrError( _whenFalse );
+                    if( IsPendingOrError( ref _whenFalse, Expr.WhenFalse ) ) return PendingOrError( _whenFalse );
                     return SetResult( _whenFalse.Result );
                 }
                 return SetResult( RuntimeObj.Undefined );

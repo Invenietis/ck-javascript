@@ -1,6 +1,6 @@
 #region LGPL License
 /*----------------------------------------------------------------------------
-* This file (CK.Javascript\EvalVisitor\EvalVisitor.cs) is part of CiviKey. 
+* This file (CK.Javascript\Expression.cs) is part of CiviKey. 
 *  
 * CiviKey is free software: you can redistribute it and/or modify 
 * it under the terms of the GNU Lesser General Public License as published 
@@ -25,38 +25,35 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Diagnostics;
+using System.Linq.Expressions;
 using CK.Core;
-using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace CK.Javascript
 {
-
-    public partial class EvalVisitor
+    public class ListOfExpr : Expr
     {
-        public PExpr Visit( ConstantExpr e )
+        public ListOfExpr( IReadOnlyList<Expr> multi )
+            : base( SourceLocation.Empty, false )
         {
-            if( e.Value == null || e.Value is string ) return new PExpr( _global.CreateString( (string)e.Value ) );
-            if( e == ConstantExpr.UndefinedExpr ) return new PExpr( RuntimeObj.Undefined );
-            if( e.Value is Double ) return new PExpr( _global.CreateNumber( (Double)e.Value ) );
-            if( e.Value is Boolean ) return new PExpr( _global.CreateBoolean( (Boolean)e.Value ) );
-            return new PExpr( new RuntimeError( e, "Unsupported JS type: " + e.Value.GetType().Name ) );
+            if( multi == null ) throw new ArgumentNullException( "multi" );
+            List = multi;
         }
 
-        public PExpr Visit( SyntaxErrorExpr e )
+        public IReadOnlyList<Expr> List { get; private set; }
+
+        [DebuggerStepThrough]
+        internal protected override T Accept<T>( IExprVisitor<T> visitor )
         {
-            return new PExpr( _global.CreateRuntimeError( e, e.ErrorMessage ) );
+            return visitor.Visit( this );
         }
 
-        public PExpr Visit( AccessorDeclVarExpr e )
+        public override string ToString()
         {
-            return new PExpr( _dynamicScope.FindRegistered( e ) );
-        }
-
-        public PExpr Visit( NopExpr e )
-        {
-            return new PExpr( RuntimeObj.Undefined );
+            return String.Join( ", ", List.Select( s => s.ToString() ) );
         }
 
     }
+
+
 }

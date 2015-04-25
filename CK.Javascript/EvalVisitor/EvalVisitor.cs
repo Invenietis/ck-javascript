@@ -35,6 +35,7 @@ namespace CK.Javascript
     {
         readonly GlobalContext _global;
         readonly Func<Expr,bool> _breakpoints;
+        readonly DynamicScope _dynamicScope;
         Frame _firstFrame;
         Frame _currentFrame;
         bool _keepStackOnError;
@@ -45,6 +46,7 @@ namespace CK.Javascript
             _global = context;
             _keepStackOnError = keepStackOnError;
             _breakpoints = breakpoints ?? (e => false);
+            _dynamicScope = new DynamicScope();
         }
 
         internal bool BreakOnNext;

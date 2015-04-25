@@ -156,133 +156,122 @@ namespace CK.Javascript
         IsUnaryOperator = 1 << 8,
         #endregion
 
-        AssignOperatorCount = 13,
-        #region IsAssignOperator: =, ~=, |=, &=, <<=, ^=, >>=, >>>=, +=, -=, /=, *= and %=.
+        BinaryOperatorCount = 12,
+        #region IsBinaryOperator: instanceof, |, &, <<, ^, >>, >>>, +, -, /, *, %.
+
+        /// <summary>
+        /// The "a instanceof CtorFunc" operator.
+        /// </summary>
+        InstanceOf = IsBinaryOperator | OpLevel10 | 1,
+
+        /// <summary>
+        /// Single pipe (|) bitwise OR operator.
+        /// </summary>
+        BitwiseOr = IsBinaryOperator | OpLevel06 | 2,
+        /// <summary>
+        /// Single ampersand (&) binary And operator.
+        /// </summary>
+        BitwiseAnd = IsBinaryOperator | OpLevel08 | 3,
+        /// <summary>
+        /// Double &lt; (&lt;&lt;) binary shift left operator.
+        /// </summary>
+        BitwiseShiftLeft = IsBinaryOperator | OpLevel11 | 4,
+        /// <summary>
+        /// Xor binary (^) operator.
+        /// </summary>
+        BitwiseXOr = IsBinaryOperator | OpLevel07 | 5,
+        /// <summary>
+        /// Double &gt; (&gt;&gt;) binary shift operator.
+        /// </summary>
+        BitwiseShiftRight = IsBinaryOperator | OpLevel11 | 6,
+        /// <summary>
+        /// Triple &gt; (&gt;&gt;&gt;) binary shift operator (zero padding).
+        /// </summary>
+        BitwiseShiftRightNoSignBit = IsBinaryOperator | OpLevel11 | 7,
+        /// <summary>
+        /// Single plus character (+).
+        /// </summary>
+        Plus = IsBinaryOperator | OpLevel12 | 8,
+        /// <summary>
+        /// Single minus character (-).
+        /// </summary>
+        Minus = IsBinaryOperator | OpLevel12 | 9,
+        /// <summary>
+        /// Single divide character (/).
+        /// </summary>
+        Divide = IsBinaryOperator | OpLevel13 | 10,
+        /// <summary>
+        /// Single star character (*).
+        /// </summary>
+        Mult = IsBinaryOperator | OpLevel13 | 11,
+        /// <summary>
+        /// Modulo %.
+        /// </summary>
+        Modulo = IsBinaryOperator | OpLevel13 | BinaryOperatorCount,
+
+        #endregion
+
+        AssignOperatorCount = 12,
+        #region IsAssignOperator: =, |=, &=, <<=, ^=, >>=, >>>=, +=, -=, /=, *= and %=.
         /// <summary>
         /// Single equal character (=).
         /// </summary>
         Assign = IsAssignOperator | OpLevel02 | 1,
 
         /// <summary>
-        /// Bitwise Not assignment (~=).
-        /// </summary>
-        BitwiseNotAssign = IsAssignOperator | OpLevel02 | 2,
-
-        /// <summary>
         /// Bitwise Or assignment (|=).
         /// </summary>
-        BitwiseOrAssign = IsAssignOperator | OpLevel02 | 3,
+        BitwiseOrAssign = IsAssignOperator | OpLevel02 | 2,
 
         /// <summary>
         /// Bitwise And assignment (&=).
         /// </summary>
-        BitwiseAndAssign = IsAssignOperator | OpLevel02 | 4,
+        BitwiseAndAssign = IsAssignOperator | OpLevel02 | 3,
 
         /// <summary>
         /// Bitwise shift left operator assignment (&lt;&lt;=).
         /// </summary>
-        BitwiseShiftLeftAssign = IsAssignOperator | OpLevel02 | 5,
+        BitwiseShiftLeftAssign = IsAssignOperator | OpLevel02 | 4,
 
         /// <summary>
         /// Xor binary (^) operator assignment (^=).
         /// </summary>
-        BitwiseXOrAssign = IsAssignOperator | OpLevel02 | 6,
+        BitwiseXOrAssign = IsAssignOperator | OpLevel02 | 5,
 
         /// <summary>
         /// Bitwise shift right operator assignment (&gt;gt;=).
         /// </summary>
-        BitwiseShiftRightAssign = IsAssignOperator | OpLevel02 | 7,
+        BitwiseShiftRightAssign = IsAssignOperator | OpLevel02 | 6,
 
         /// <summary>
         /// Zero padded bitwise shift right operator assignment (&gt;gt;gt;=).
         /// </summary>
-        BitwiseShiftRightNoSignBitAssign = IsAssignOperator | OpLevel02 | 8,
+        BitwiseShiftRightNoSignBitAssign = IsAssignOperator | OpLevel02 | 7,
 
         /// <summary>
         /// Add assignment (+=).
         /// </summary>
-        PlusAssign = IsAssignOperator | OpLevel02 | 9,
+        PlusAssign = IsAssignOperator | OpLevel02 | 8,
 
         /// <summary>
         /// Substract assignment (-=).
         /// </summary>
-        MinusAssign = IsAssignOperator | OpLevel02 | 10,
+        MinusAssign = IsAssignOperator | OpLevel02 | 9,
 
         /// <summary>
         /// Divide assignment (/=).
         /// </summary>
-        DivideAssign = IsAssignOperator | OpLevel02 | 11,
+        DivideAssign = IsAssignOperator | OpLevel02 | 10,
 
         /// <summary>
         /// Multiplication assignment (*=).
         /// </summary>
-        MultAssign = IsAssignOperator | OpLevel02 | 12,
+        MultAssign = IsAssignOperator | OpLevel02 | 11,
 
         /// <summary>
-        /// Modulo assignment (*=).
+        /// Modulo assignment (%=).
         /// </summary>
         ModuloAssign = IsAssignOperator | OpLevel02 | AssignOperatorCount,
-
-        #endregion
-
-        BinaryOperatorCount = 12,
-        #region IsBinaryOperator: |, ^, &, >>, <<, >>>, +, -, /, *, %, instanceof.
-
-        /// <summary>
-        /// Single pipe (|) bitwise OR operator.
-        /// </summary>
-        BitwiseOr = IsBinaryOperator | OpLevel06 | 1,
-
-        /// <summary>
-        /// Xor binary (^) operator.
-        /// </summary>
-        BitwiseXOr = IsBinaryOperator | OpLevel07 | 2,
-
-        /// <summary>
-        /// Single ampersand (&) binary And operator.
-        /// </summary>
-        BitwiseAnd = IsBinaryOperator | OpLevel08 | 3,
-
-        /// <summary>
-        /// Double &gt; (&gt;&gt;) binary shift operator.
-        /// </summary>
-        BitwiseShiftRight = IsBinaryOperator | OpLevel11 | 4,
-
-        /// <summary>
-        /// Double &lt; (&lt;&lt;) binary shift left operator.
-        /// </summary>
-        BitwiseShiftLeft = IsBinaryOperator | OpLevel11 | 5,
-
-        /// <summary>
-        /// Triple &gt; (&gt;&gt;&gt;) binary shift operator (zero padding).
-        /// </summary>
-        BitwiseShiftRightNoSignBit = IsBinaryOperator | OpLevel11 | 6,
-
-        /// <summary>
-        /// Single plus character (+).
-        /// </summary>
-        Plus = IsBinaryOperator | OpLevel12 | 7,
-        /// <summary>
-        /// Single minus character (-).
-        /// </summary>
-        Minus = IsBinaryOperator | OpLevel12 | 8,
-        /// <summary>
-        /// Single divide character (/).
-        /// </summary>
-        Divide = IsBinaryOperator | OpLevel13 | 9,
-        /// <summary>
-        /// Single star character (*).
-        /// </summary>
-        Mult = IsBinaryOperator | OpLevel13 | 10,
-        /// <summary>
-        /// Modulo %.
-        /// </summary>
-        Modulo = IsBinaryOperator | OpLevel13 | 11,
-
-        /// <summary>
-        /// The "a instanceof CtorFunc" operator.
-        /// </summary>
-        InstanceOf = IsBinaryOperator | OpLevel10 | BinaryOperatorCount,
 
         #endregion
 

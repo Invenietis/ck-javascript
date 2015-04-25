@@ -34,28 +34,31 @@ namespace CK.Javascript
 
     public partial class EvalVisitor
     {
-        public PExpr Visit( ConstantExpr e )
+        class ListOfExprFrame : Frame<ListOfExpr>
         {
-            if( e.Value == null || e.Value is string ) return new PExpr( _global.CreateString( (string)e.Value ) );
-            if( e == ConstantExpr.UndefinedExpr ) return new PExpr( RuntimeObj.Undefined );
-            if( e.Value is Double ) return new PExpr( _global.CreateNumber( (Double)e.Value ) );
-            if( e.Value is Boolean ) return new PExpr( _global.CreateBoolean( (Boolean)e.Value ) );
-            return new PExpr( new RuntimeError( e, "Unsupported JS type: " + e.Value.GetType().Name ) );
+            readonly PExpr[] _statements;
+            int _sCount;
+
+            public ListOfExprFrame( EvalVisitor evaluator, ListOfExpr e )
+                : base( evaluator, e )
+            {
+                _statements = new PExpr[e.List.Count];
+            }
+
+            protected override PExpr DoVisit()
+            {
+                while( _sCount < _statements.Length )
+                {
+                    if( IsPendingOrError( ref _statements[_sCount], Expr.List[_sCount] ) ) return PendingOrError( _statements[_sCount] );
+                    ++_sCount;
+                }
+                return SetResult( _statements[_sCount-1].Result );
+            }
         }
 
-        public PExpr Visit( SyntaxErrorExpr e )
+        public PExpr Visit( ListOfExpr e )
         {
-            return new PExpr( _global.CreateRuntimeError( e, e.ErrorMessage ) );
-        }
-
-        public PExpr Visit( AccessorDeclVarExpr e )
-        {
-            return new PExpr( _dynamicScope.FindRegistered( e ) );
-        }
-
-        public PExpr Visit( NopExpr e )
-        {
-            return new PExpr( RuntimeObj.Undefined );
+            using( var f = new ListOfExprFrame( this, e ) ) return f.Visit();
         }
 
     }

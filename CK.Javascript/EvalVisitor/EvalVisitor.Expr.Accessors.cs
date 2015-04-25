@@ -32,12 +32,6 @@ using System.Collections.ObjectModel;
 namespace CK.Javascript
 {
 
-    public interface IAccessorFrameState
-    {
-        PExpr Visit();
-    }
-
-
     public partial class EvalVisitor
     {
         class AccessorFrame : Frame<AccessorExpr>, IAccessorFrame
@@ -164,7 +158,7 @@ namespace CK.Javascript
             /// </summary>
             protected override PExpr DoVisit()
             {
-                if( (_left = Resolve( _left, Expr.Left )).IsPendingOrError ) return ReentrantPendingOrError( _left );
+                if( IsPendingOrError( ref _left, Expr.Left ) ) return ReentrantPendingOrError( _left );
                 return Result != null ? new PExpr( Result ) : SetError();
             }
 

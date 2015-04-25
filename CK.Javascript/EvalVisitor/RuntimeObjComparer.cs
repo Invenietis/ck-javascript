@@ -38,7 +38,9 @@ namespace CK.Javascript
         public RuntimeObjComparer( RuntimeObj x, RuntimeObj y )
         {
             if( x == RuntimeObj.Null ) x = RuntimeObj.Undefined;
+            else x = x.ToValue();
             if( y == RuntimeObj.Null ) y = RuntimeObj.Undefined;
+            else y = y.ToValue();
 
             if( String.CompareOrdinal( x.Type, y.Type ) > 0 )
             {

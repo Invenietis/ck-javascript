@@ -103,6 +103,15 @@ namespace CK.Javascript
 
         public abstract double ToDouble();
 
+        /// <summary>
+        /// Only <see cref="RefRuntimeObject"/> overrides this method.
+        /// </summary>
+        /// <returns>This object or the referenced object if this is a reference.</returns>
+        public virtual RuntimeObj ToValue()
+        {
+            return this;
+        }
+
         public virtual RuntimeObj ToPrimitive( GlobalContext c )
         {
             return this;

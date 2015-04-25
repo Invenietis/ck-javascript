@@ -32,7 +32,7 @@ namespace CK.Javascript
         /// <summary>
         /// Executes only one step.
         /// </summary>
-        /// <returns>A promise that may be resolved if all the required code hase been executed.</returns>
+        /// <returns>A promise that may be resolved if all the required code has been executed.</returns>
         PExpr StepIn();
 
     }

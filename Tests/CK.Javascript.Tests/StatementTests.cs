@@ -49,5 +49,134 @@ namespace CK.Javascript.Tests
             }
         }
 
+        [Test]
+        public void local_variables_definition_and_assignments()
+        {
+            string s = @"var i;
+                         var j;
+                         i = 37;
+                         j = i*100+12;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalNumber>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 3712 ) );
+        }
+
+        [Test]
+        public void declaring_a_local_variables_do_not_evaluate_to_undefined_like_in_javascript()
+        {
+            string s = @"var i = 37;
+                         var j = i*100+12;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalNumber>( o );
+            Assert.AreEqual( o.ToString(), "3712" );
+        }
+
+        [Test]
+        public void variables_evaluate_to_RefRuntimeObj_objects()
+        {
+            string s = @"var i = 37;
+                         var j = i*100+12;
+                         j;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 3712 ) );
+        }
+        
+        [Test]
+        public void simple_if_block()
+        {
+            string s = @"var i = 37;
+                         var j;
+                         if( i == 37 ) 
+                         {
+                            j = 3712;
+                            i += j;
+                         }
+                         // i = 0: the 0 value is the result;
+                         if( j > 3000 ) i = 0;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalNumber>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 0 ) );
+        }
+
+        [Test]
+        public void comparing_to_undefined_keyword_works()
+        {
+            string s = @"var ResultAsRefRuntimeObject = 8;
+                         var X;
+                         if( X === undefined ) ResultAsRefRuntimeObject;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 8 ) );
+        }
+
+        [Test]
+        public void post_incrementation_works()
+        {
+            string s = @"var i = 0;
+                         if( i++ == 0 && i++ == 1 && i++ == 2 ) i;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 3 ) );
+        }
+
+        [Test]
+        public void pre_incrementation_works()
+        {
+            string s = @"var i = 0;
+                         if( ++i == 1 && ++i == 2 && ++i == 3 && ++i == 4 ) i;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 4 ) );
+        }
+
+        [Test]
+        public void while_loop_works()
+        {
+            string s = @"var i = 0;
+                         while( i < 10 ) i++;
+                         i;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 10 ) );
+        }
+
+        [Test]
+        public void while_loop_with_block_works()
+        {
+            string s = @"var i = 0;
+                         var j = 0;
+                         while( i < 10 ) { 
+                            i++;
+                            if( i%2 == 0 ) j += 10;
+                         }
+                         j;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 50 ) );
+        }
+
+        [Test]
+        public void while_loop_with_empty_block_works()
+        {
+            string s = @"var i = 0;
+                         while( i++ < 10 );
+                         i;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 11 ) );
+        }
+
+        [Test]
+        public void multiple_variables_declaration_is_supported_and_they_can_reference_previous_ones()
+        {
+            string s = @"var i = 1, j = i*200+34, k = 'a string';
+                         k+i+j;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalString>( o );
+            Assert.That( o.ToString(), Is.EqualTo( "a string1234" ) );
+        }
+        
+
     }
 }

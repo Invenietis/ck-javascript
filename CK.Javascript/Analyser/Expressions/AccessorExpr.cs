@@ -10,9 +10,9 @@ namespace CK.Javascript
 {
 
     /// <summary>
-    /// There are 3 type of concrete Accessors: <see cref="AccessorMemberExpr"/> for member access, <see cref="AccessorIndexerExpr"/>
-    /// that handles brackets with one and only one [expression] and <see cref="AccessorCallExpr"/> that handles calls with parens that 
-    /// contain zero or more arguments.
+    /// There are 4 type of concrete Accessors: <see cref="AccessorMemberExpr"/> for member access, <see cref="AccessorIndexerExpr"/>
+    /// that handles brackets with one and only one [expression], <see cref="AccessorCallExpr"/> that handles calls with parens that 
+    /// contain zero or more arguments and <see cref="AccessorDeclVarExpr"/> that is the definition of a variable.
     /// </summary>
     public abstract class AccessorExpr : Expr
     {
@@ -83,6 +83,30 @@ namespace CK.Javascript
         }
 
     }
+
+    public class AccessorDeclVarExpr : AccessorExpr
+    {
+        public AccessorDeclVarExpr( SourceLocation location, string name )
+            : base( location, null, false )
+        {
+            if( name == null ) throw new ArgumentNullException();
+            Name = name;
+        }
+
+        public string Name { get; private set; }
+
+        [DebuggerStepThrough]
+        internal protected override T Accept<T>( IExprVisitor<T> visitor )
+        {
+            return visitor.Visit( this );
+        }
+
+        public override string ToString()
+        {
+            return "var " + Name;
+        }
+    }
+
 
     public class AccessorIndexerExpr : AccessorExpr
     {

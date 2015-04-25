@@ -98,13 +98,6 @@ namespace CK.Javascript
                 return sub.IsErrorResult ? SetResult( sub.Result ) : new PExpr( this );
             }
 
-            public PExpr Resolve( PExpr current, Expr e )
-            {
-                if( current.IsResolved ) return current;
-                if( current.IsUnknown ) return _visitor.VisitExpr( e );
-                return current.Deferred.StepOut();
-            }
-
             public bool IsPendingOrError( ref PExpr current, Expr e )
             {
                 if( current.IsResolved ) return false;
@@ -143,10 +136,15 @@ namespace CK.Javascript
             {
                 if( _result != null && !(_visitor._keepStackOnError && _result is RuntimeError) )
                 {
+                    OnDispose();
                     _visitor._currentFrame = _prev;
                     if( _prev != null ) _prev._next = null;
                     else _visitor._firstFrame = null;
                 }
+            }
+            
+            protected virtual void OnDispose()
+            {
             }
         }
 

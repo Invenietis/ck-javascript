@@ -48,7 +48,7 @@ namespace CK.Javascript
             {
                 if( _engine == null ) throw new ObjectDisposedException( "EvaluationResult" );
                 if( _status != ScriptEngineStatus.IsPending ) throw new InvalidOperationException();
-                if( _ev.CurrentFrame != null )
+                if( _ev.FirstFrame != null )
                 {
                     UpdateStatus( _ev.FirstFrame.StepOut() );
                 }
