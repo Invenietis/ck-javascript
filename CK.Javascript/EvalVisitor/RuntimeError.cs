@@ -28,15 +28,14 @@ using System.Text;
 
 namespace CK.Javascript
 {
-    public class RuntimeError : RuntimeObj
+    public class RuntimeError : RuntimeSignal
     {
         RuntimeError _next;
         RuntimeError _prev;
 
         public RuntimeError( Expr culprit, string message, RuntimeError previous = null )
+            : base( culprit )
         {
-            if( culprit == null ) throw new ArgumentNullException( "culprit" );
-            CulpritExpr = culprit;
             Message = message;
             if( previous != null )
             {
@@ -45,8 +44,6 @@ namespace CK.Javascript
                 _prev = previous;
             }
         }
-
-        public Expr CulpritExpr { get; private set; }
 
         public string Message { get; private set; }
 
@@ -62,26 +59,6 @@ namespace CK.Javascript
             }
         }
 
-        public override string Type
-        {
-            get { return RuntimeObj.TypeObject; }
-        }
-
-        public override double ToDouble()
-        {
-            return Double.NaN;
-        }
-
-        public override bool ToBoolean()
-        {
-            return false;
-        }
-
-        public override RuntimeObj ToPrimitive( GlobalContext c )
-        {
-            return RuntimeObj.Undefined;
-        }
-
         public override PExpr Visit( IAccessorFrame frame )
         {
             if( frame.Expr.IsMember( "message" ) ) return frame.SetResult( frame.Global.CreateString( Message ) );
@@ -90,7 +67,7 @@ namespace CK.Javascript
 
         public override string ToString()
         {
-            return String.Format( "Error: {0} at {1}.", Message, CulpritExpr.Location.ToString() );
+            return String.Format( "Error: {0} at {1}.", Message, Expr.Location.ToString() );
         }
     }
 

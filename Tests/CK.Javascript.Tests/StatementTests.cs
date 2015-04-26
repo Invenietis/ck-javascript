@@ -221,6 +221,22 @@ namespace CK.Javascript.Tests
         }
 
         [Test]
+        public void while_loop_support_break_statement()
+        {
+            string s = @"
+                        var i = 0, j = '';
+                        while( true )
+                        {
+                            if( i++ >= 5 ) break;
+                            j += 'a';
+                        }
+                        j;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToString(), Is.EqualTo( "aaaaa" ) );
+        }
+
+        [Test]
         public void multiple_variables_declaration_is_supported_and_they_can_reference_previous_ones()
         {
             string s = @"var i = 1, j = i*200+34, k = 'a string';

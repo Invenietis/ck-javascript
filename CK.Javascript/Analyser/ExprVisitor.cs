@@ -151,6 +151,12 @@ namespace CK.Javascript
             return cV == e.Condition && oV == e.Code ? e : new WhileExpr( e.Location, cV, oV );
         }
 
+        public virtual Expr Visit( BreakOrReturnExpr e )
+        {
+            var rV = e.Returns != null ? VisitExpr( e.Returns ) : null;
+            return rV == e.Returns ? e : new BreakOrReturnExpr( e.Location, e.IsReturn, rV );
+        }
+
     }
 
 }

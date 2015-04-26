@@ -46,7 +46,7 @@ namespace CK.Javascript
 
             protected override PExpr DoVisit()
             {
-                if( IsPendingOrError( ref _left, Expr.Left ) ) return PendingOrError( _left );
+                if( IsPendingOrSignal( ref _left, Expr.Left ) ) return PendingOrSignal( _left );
 
                 // Do not evaluate right expression if it is useless: short-circuit boolean evaluation.
                 if( (Expr.BinaryOperatorToken == JSTokeniserToken.And && !_left.Result.ToBoolean())
@@ -55,7 +55,7 @@ namespace CK.Javascript
                     return SetResult( _left.Result );
                 }
 
-                if( IsPendingOrError( ref _right, Expr.Right ) ) return PendingOrError( _right );
+                if( IsPendingOrSignal( ref _right, Expr.Right ) ) return PendingOrSignal( _right );
 
                 RuntimeObj left = _left.Result;
                 RuntimeObj right = _right.Result;
@@ -111,11 +111,7 @@ namespace CK.Javascript
                                     result = Global.CreateBoolean( !new RuntimeObjComparer( left, right ).AreEqual( Global ) );
                                     break;
                                 }
-                            default:
-                                {
-                                    result = new RuntimeError( Expr, "Unsupported operator: " + ((int)Expr.BinaryOperatorToken & 15) );
-                                    break;
-                                }
+                            default: throw UnsupportedOperatorException();
                         }
                         #endregion
                     }
@@ -206,20 +202,18 @@ namespace CK.Javascript
                                     result = BitwiseShift( left, right, ( i, shift ) => Math.Abs(i) >> shift );
                                     break;
                                 }
-                            default:
-                                {
-                                    result = new RuntimeError( Expr, "Unsupported operator: " + ((int)Expr.BinaryOperatorToken & 15) );
-                                    break;
-                                }
+                            default: throw UnsupportedOperatorException();
                         }
                         #endregion
                     }
-                    else
-                    {
-                        result = new RuntimeError( Expr, "Unsupported binary operator: " + JSTokeniser.Explain( Expr.BinaryOperatorToken ) );
-                    }
+                    else throw UnsupportedOperatorException();
                 }
                 return SetResult( result );
+            }
+
+            CKException UnsupportedOperatorException()
+            {
+                return new CKException( "Unsupported binary operator: '{0}' ({1}).", JSTokeniser.Explain( Expr.BinaryOperatorToken ), (int)Expr.BinaryOperatorToken );
             }
 
             RuntimeObj BitwiseShift( RuntimeObj val, RuntimeObj shift, bool right )
@@ -252,7 +246,7 @@ namespace CK.Javascript
 
         public PExpr Visit( BinaryExpr e )
         {
-            using( var f = new BinaryExprFrame( this, e ) ) return f.Visit();
+            return new BinaryExprFrame( this, e ).Visit();
         }
 
     }

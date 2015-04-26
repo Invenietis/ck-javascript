@@ -46,8 +46,8 @@ namespace CK.Javascript
 
             protected override PExpr DoVisit()
             {
-                if( IsPendingOrError( ref _left, Expr.Left ) ) return PendingOrError( _left );
-                if( IsPendingOrError( ref _right, Expr.Right ) ) return PendingOrError( _right );
+                if( IsPendingOrSignal( ref _left, Expr.Left ) ) return PendingOrSignal( _left );
+                if( IsPendingOrSignal( ref _right, Expr.Right ) ) return PendingOrSignal( _right );
                 RefRuntimeObj r = _left.Result as RefRuntimeObj;
                 if( r == null ) return SetResult( Global.CreateRuntimeError( Expr.Left, "Invalid assignment left-hand side." ) );
                 r.Value = _right.Result;
@@ -57,7 +57,7 @@ namespace CK.Javascript
 
         public PExpr Visit( AssignExpr e )
         {
-            using( var f = new AssignExprFrame( this, e ) ) return f.Visit();
+            return new AssignExprFrame( this, e ).Visit();
         }
 
     }

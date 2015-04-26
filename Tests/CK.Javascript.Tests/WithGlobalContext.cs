@@ -58,14 +58,14 @@ namespace CK.Javascript.Tests
                     } )
                     .On( "Ghost" ).On( "M" ).OnCall( -1, ( f, args ) =>
                     {
-                        Console.WriteLine( "Ghost.M() called with {0} arguments: {1} (=> returned {0}).", 
+                        Console.WriteLine( "Ghost.M() called with {0} arguments: {1} (=> returns {0}).", 
                                                 args.Count, 
                                                 String.Join( ", ", args.Select( a => a.ToString() )) );
                         return f.SetResult( f.Global.CreateNumber( args.Count ) );
                     } )
                     .On( "Ghost" ).On( "M" ).OnIndex( ( f, idx ) =>
                     {
-                        Console.WriteLine( "Ghost.M[{0}] called (=> returned {0}).", JSSupport.ToInt32( idx.ToDouble() ) );
+                        Console.WriteLine( "Ghost.M[{0}] called (=> returns {0}).", JSSupport.ToInt32( idx.ToDouble() ) );
                         return f.SetResult( idx );
                     } )
                     );

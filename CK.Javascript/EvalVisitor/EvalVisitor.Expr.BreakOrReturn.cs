@@ -1,6 +1,6 @@
 #region LGPL License
 /*----------------------------------------------------------------------------
-* This file (CK.Javascript\IExprVisitor.cs) is part of CiviKey. 
+* This file (CK.Javascript\EvalVisitor\EvalVisitor.cs) is part of CiviKey. 
 *  
 * CiviKey is free software: you can redistribute it and/or modify 
 * it under the terms of the GNU Lesser General Public License as published 
@@ -22,32 +22,42 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Diagnostics;
 using CK.Core;
+using System.Collections.ObjectModel;
 
 namespace CK.Javascript
 {
-    /// <summary>
-    /// Basic visitor contract: it is parametrized with the returns type of the visit methods.
-    /// </summary>
-    /// <typeparam name="T">Type of the returns value of the visit methods.</typeparam>
-    public interface IExprVisitor<out T>
+
+    public partial class EvalVisitor
     {
-        T VisitExpr( Expr e );
-        T Visit( AccessorMemberExpr e );
-        T Visit( AccessorIndexerExpr e );
-        T Visit( AccessorCallExpr e );
-        T Visit( BinaryExpr e );
-        T Visit( ConstantExpr e );
-        T Visit( IfExpr e );
-        T Visit( SyntaxErrorExpr e );
-        T Visit( UnaryExpr e );
-        T Visit( ListOfExpr e );
-        T Visit( BlockExpr e );
-        T Visit( AssignExpr e );
-        T Visit( AccessorDeclVarExpr e );
-        T Visit( NopExpr e );
-        T Visit( PrePostIncDecExpr e );
-        T Visit( WhileExpr e );
-        T Visit( BreakOrReturnExpr e );
+        class BreakOrReturnExprFrame : Frame<BreakOrReturnExpr>
+        {
+            PExpr _returns;
+
+            public BreakOrReturnExprFrame( EvalVisitor evaluator, BreakOrReturnExpr e )
+                : base( evaluator, e )
+            {
+            }
+
+            protected override PExpr DoVisit()
+            {
+                if( Expr.Returns != null )
+                {
+                    if( IsPendingOrSignal( ref _returns, Expr.Returns ) ) return PendingOrSignal( _returns );
+                    return SetResult( new RuntimeBreak( Expr, _returns.Result ) );
+                }
+                return SetResult( new RuntimeBreak( Expr ) );
+            }
+        }
+
+        public PExpr Visit( BreakOrReturnExpr e )
+        {
+            return new BreakOrReturnExprFrame( this, e ).Visit();
+        }
+
     }
 }

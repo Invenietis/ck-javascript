@@ -61,7 +61,7 @@ namespace CK.Javascript
 
         public PExpr Visit( BlockExpr e )
         {
-            using( var f = new BlockExprFrame( this, e ) ) return f.Visit();
+            return new BlockExprFrame( this, e ).Visit();
         }
 
     }

@@ -49,7 +49,7 @@ namespace CK.Javascript
             {
                 while( _sCount < _statements.Length )
                 {
-                    if( IsPendingOrError( ref _statements[_sCount], Expr.List[_sCount] ) ) return PendingOrError( _statements[_sCount] );
+                    if( IsPendingOrSignal( ref _statements[_sCount], Expr.List[_sCount] ) ) return PendingOrSignal( _statements[_sCount] );
                     ++_sCount;
                 }
                 return SetResult( _statements[_sCount-1].Result );
@@ -58,7 +58,7 @@ namespace CK.Javascript
 
         public PExpr Visit( ListOfExpr e )
         {
-            using( var f = new ListOfExprFrame( this, e ) ) return f.Visit();
+            return new ListOfExprFrame( this, e ).Visit();
         }
 
     }

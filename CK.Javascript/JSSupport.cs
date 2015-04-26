@@ -124,7 +124,7 @@ namespace CK.Javascript
         /// <summary>
         /// Handles "Infinity" and "-Infinity". The string may contains leading and/or trailing white spaces and a leading negative sign.
         /// When <see cref="String.IsNullOrWhiteSpace"/> the result is 0 by default (it is <see cref="Double.NaN"/> for <see cref="ParseFloat"/>). 
-        /// Non parse-able numbers (or "NaN" itself) are returned as <see cref="Double.NaN"/>.
+        /// Non parse-able numbers (or "NaN" itself) are returns as <see cref="Double.NaN"/>.
         /// </summary>
         /// <param name="s">String to convert.</param>
         /// <param name="whenNullOrWhitespace">Defaults to 0.</param>
@@ -143,7 +143,7 @@ namespace CK.Javascript
         /// <summary>
         /// Handles "Infinity" and "-Infinity". The string may contains leading and/or trailing white spaces and a leading negative sign.
         /// When <see cref="String.IsNullOrWhiteSpace"/> the result is <see cref="Double.NaN"/>. 
-        /// Non parse-able numbers (or "NaN" itself) are returned as <see cref="Double.NaN"/>.
+        /// Non parse-able numbers (or "NaN" itself) are returns as <see cref="Double.NaN"/>.
         /// </summary>
         /// <param name="s">String to convert.</param>
         /// <returns>The double, following javascript parseFloat rules.</returns>

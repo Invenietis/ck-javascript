@@ -60,11 +60,11 @@ namespace CK.Javascript
                     _winner._initCount = 0;
                     while( _rpCount < _args.Length )
                     {
-                        if( _winner.IsPendingOrError( ref _args[_rpCount], _winner.Expr.Arguments[_rpCount] ) ) return _winner.PendingOrError( _args[_rpCount] );
+                        if( _winner.IsPendingOrSignal( ref _args[_rpCount], _winner.Expr.Arguments[_rpCount] ) ) return _winner.PendingOrSignal( _args[_rpCount] );
                         ++_rpCount;
                     }
                     var r = _indexCode != null ? _indexCode( _winner, _args[0].Result ) : _callCode( _winner, this );
-                    if( !r.IsResolved && r.Deferred != _winner ) throw new CKException( "Implementations must call either SetResult, SetError or PendigOrError frame's method." );
+                    if( !r.IsResolved && r.Deferred != _winner ) throw new CKException( "Implementations must call either SetResult, SetError, or PendigOrSignal frame's method." );
                     return r;
                 }
 
@@ -158,7 +158,7 @@ namespace CK.Javascript
             /// </summary>
             protected override PExpr DoVisit()
             {
-                if( IsPendingOrError( ref _left, Expr.Left ) ) return ReentrantPendingOrError( _left );
+                if( IsPendingOrSignal( ref _left, Expr.Left ) ) return ReentrantPendingOrSignal( _left );
                 return Result != null ? new PExpr( Result ) : SetError();
             }
 
@@ -203,9 +203,9 @@ namespace CK.Javascript
                 get { return base.Expr; } 
             }
 
-            protected PExpr ReentrantPendingOrError( PExpr sub )
+            protected PExpr ReentrantPendingOrSignal( PExpr sub )
             {
-                Debug.Assert( sub.IsPendingOrError );
+                Debug.Assert( sub.IsPendingOrSignal );
                 if( Result != null )
                 {
                     Debug.Assert( Result == sub.Result );
@@ -248,17 +248,17 @@ namespace CK.Javascript
                 {
                     if( ((AccessorMemberExpr)Expr).IsUnbound )
                     {
-                        if( (_left = Global.Visit( this )).IsPendingOrError ) return ReentrantPendingOrError( _left );
+                        if( (_left = Global.Visit( this )).IsPendingOrSignal ) return ReentrantPendingOrSignal( _left );
                     }
                     else
                     {
-                        if( IsPendingOrError( ref _left, Expr.Left ) ) return ReentrantPendingOrError( _left );
+                        if( IsPendingOrSignal( ref _left, Expr.Left ) ) return ReentrantPendingOrSignal( _left );
                     }
                 }
                 if( Result != null ) return new PExpr( Result );
 
                 Debug.Assert( !_result.IsResolved );
-                if( (_result = _left.Result.Visit( this )).IsPendingOrError ) return ReentrantPendingOrError( _result );
+                if( (_result = _left.Result.Visit( this )).IsPendingOrSignal ) return ReentrantPendingOrSignal( _result );
                 return ReentrantSetResult( _result.Result );
             }
 
@@ -266,17 +266,17 @@ namespace CK.Javascript
 
         public PExpr Visit( AccessorMemberExpr e )
         {
-            using( var f = new AccessorMemberFrame( this, e ) ) return f.Visit();
+            return new AccessorMemberFrame( this, e ).Visit();
         }
 
         public PExpr Visit( AccessorIndexerExpr e )
         {
-            using( var f = new AccessorFrame( this, e ) ) return f.Visit();
+            return new AccessorFrame( this, e ).Visit();
         }
 
         public PExpr Visit( AccessorCallExpr e )
         {
-            using( var f = new AccessorFrame( this, e ) ) return f.Visit();
+            return new AccessorFrame( this, e ).Visit();
         }
 
     }

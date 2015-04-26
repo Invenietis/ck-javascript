@@ -44,7 +44,7 @@ namespace CK.Javascript
 
             protected override PExpr DoVisit()
             {
-                if( IsPendingOrError( ref _expression, Expr.Expression ) ) return PendingOrError( _expression );
+                if( IsPendingOrSignal( ref _expression, Expr.Expression ) ) return PendingOrSignal( _expression );
 
                 RuntimeObj result = _expression.Result;
                 // Minus and Plus are classified as a binary operator.
@@ -83,11 +83,7 @@ namespace CK.Javascript
                                 result = RuntimeObj.Undefined;
                                 break;
                             }
-                        default:
-                            {
-                                result = new RuntimeError( Expr, "Unsupported unary operator: " + JSTokeniser.Explain( Expr.TokenType ) );
-                                break;
-                            }
+                        default: throw new CKException( "Unsupported unary operator: '{0}' ({1}).", JSTokeniser.Explain( Expr.TokenType ), (int)Expr.TokenType );
                     }
                 }
                 return SetResult( result );
@@ -96,7 +92,7 @@ namespace CK.Javascript
 
         public PExpr Visit( UnaryExpr e )
         {
-            using( var f = new UnaryExprFrame( this, e ) ) return f.Visit();
+            return new UnaryExprFrame( this, e ).Visit();
         }
     }
 }

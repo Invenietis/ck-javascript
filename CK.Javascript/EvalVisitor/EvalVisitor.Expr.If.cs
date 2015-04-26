@@ -47,17 +47,17 @@ namespace CK.Javascript
 
             protected override PExpr DoVisit()
             {
-                if( IsPendingOrError( ref _condition, Expr.Condition ) ) return PendingOrError( _condition );
+                if( IsPendingOrSignal( ref _condition, Expr.Condition ) ) return PendingOrSignal( _condition );
 
                 if( _condition.Result.ToBoolean() )
                 {
-                    if( IsPendingOrError( ref _whenTrue, Expr.WhenTrue ) ) return PendingOrError( _whenTrue );
+                    if( IsPendingOrSignal( ref _whenTrue, Expr.WhenTrue ) ) return PendingOrSignal( _whenTrue );
                     return SetResult( _whenTrue.Result );
                 }
 
                 if( Expr.WhenFalse != null )
                 {
-                    if( IsPendingOrError( ref _whenFalse, Expr.WhenFalse ) ) return PendingOrError( _whenFalse );
+                    if( IsPendingOrSignal( ref _whenFalse, Expr.WhenFalse ) ) return PendingOrSignal( _whenFalse );
                     return SetResult( _whenFalse.Result );
                 }
                 return SetResult( RuntimeObj.Undefined );
@@ -66,7 +66,7 @@ namespace CK.Javascript
 
         public PExpr Visit( IfExpr e )
         {
-            using( var f = new IfExprFrame( this, e ) ) return f.Visit();
+            return new IfExprFrame( this, e ).Visit();
         }
 
     }

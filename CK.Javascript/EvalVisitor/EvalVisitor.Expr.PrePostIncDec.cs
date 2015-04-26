@@ -45,7 +45,7 @@ namespace CK.Javascript
 
             protected override PExpr DoVisit()
             {
-                if( IsPendingOrError( ref _operand, Expr.Operand ) ) return PendingOrError( _operand );
+                if( IsPendingOrSignal( ref _operand, Expr.Operand ) ) return PendingOrSignal( _operand );
                 RefRuntimeObj r = _operand.Result as RefRuntimeObj;
                 if( r == null ) return SetResult( Global.CreateRuntimeError( Expr.Operand, "Invalid increment or decrement operand." ) );
                 
@@ -59,7 +59,7 @@ namespace CK.Javascript
 
         public PExpr Visit( PrePostIncDecExpr e )
         {
-            using( var f = new PrePostIncDecExprFrame( this, e ) ) return f.Visit();
+            return new PrePostIncDecExprFrame( this, e ).Visit();
         }
 
     }

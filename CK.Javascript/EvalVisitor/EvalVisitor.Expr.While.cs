@@ -48,18 +48,28 @@ namespace CK.Javascript
             {
                 for( ; ; )
                 {
-                    if( IsPendingOrError( ref _condition, Expr.Condition ) ) return PendingOrError( _condition );
+                    if( IsPendingOrSignal( ref _condition, Expr.Condition ) ) return PendingOrSignal( _condition );
                     if( !_condition.Result.ToBoolean() ) break;
-                    if( IsPendingOrError( ref _code, Expr.Code ) ) return PendingOrError( _code );
+                    if( IsPendingOrSignal( ref _code, Expr.Code ) ) return PendingOrSignal( _code );
                     _condition = _code = new PExpr();
                 }
                 return SetResult( RuntimeObj.Undefined );
+            }
+
+            protected override bool OnSignal( ref RuntimeObj result )
+            {
+                if( result is RuntimeBreak )
+                {
+                    result = RuntimeObj.Undefined;
+                    return true;
+                }
+                return base.OnSignal( ref result );
             }
         }
 
         public PExpr Visit( WhileExpr e )
         {
-            using( var f = new WhileExprFrame( this, e ) ) return f.Visit();
+            return new WhileExprFrame( this, e ).Visit();
         }
 
     }

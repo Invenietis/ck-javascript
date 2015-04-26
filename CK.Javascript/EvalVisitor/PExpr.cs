@@ -20,18 +20,20 @@ namespace CK.Javascript
         {
         }
 
-        public PExpr( RuntimeObj resultOrError )
-            : this( null, resultOrError )
+        public PExpr( RuntimeObj resultOrSignal )
+            : this( null, resultOrSignal )
         {
         }
 
-        PExpr( IDeferredExpr pending, RuntimeObj resultOrError )
+        PExpr( IDeferredExpr pending, RuntimeObj resultOrSignal )
         {
             Deferred = pending;
-            Result = resultOrError;
+            Result = resultOrSignal;
         }
 
         public bool IsUnknown { get { return Result == null && Deferred == null; } }
+
+        public bool IsSignal { get { return Result is RuntimeSignal; } }
 
         public bool IsErrorResult { get { return Result is RuntimeError; } }
 
@@ -39,9 +41,9 @@ namespace CK.Javascript
         
         public bool IsResolved { get { return Result != null; } }
 
-        public bool IsPendingOrError { get { return Deferred != null || IsErrorResult; } }
+        public bool IsPendingOrSignal { get { return Deferred != null || IsSignal; } }
 
-        public bool IsValidResult { get { return Result != null && !IsErrorResult; } }
+        public bool IsValidResult { get { return Result != null && !IsSignal; } }
 
         public override string ToString()
         {

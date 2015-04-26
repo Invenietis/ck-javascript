@@ -87,6 +87,11 @@ namespace CK.Javascript
         {
             return _value.Visit( frame );
         }
+
+        public override string ToString()
+        {
+            return _value.ToString();
+        } 
     }
 
 }
