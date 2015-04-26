@@ -12,11 +12,19 @@ namespace CK.Javascript
     public class WhileExpr : Expr
     {
         public WhileExpr( SourceLocation location, Expr condition, Expr code )
+            : this( location, false, condition, code )
+        {
+        }
+
+        public WhileExpr( SourceLocation location, bool doWhile, Expr condition, Expr code )
             : base( location, false )
         {
             Condition = condition;
             Code = code;
+            DoWhile = doWhile;
         }
+
+        public bool DoWhile { get; private set; }
 
         public Expr Condition { get; private set; }
 

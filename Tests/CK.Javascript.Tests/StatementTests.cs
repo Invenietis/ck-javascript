@@ -210,6 +210,23 @@ namespace CK.Javascript.Tests
         }
 
         [Test]
+        public void do_while_loop_with_block_works()
+        {
+            string s = @"var i = 0;
+                         var j = 0;
+                         do
+                         { 
+                            i++;
+                            if( i%2 == 0 ) j += 10;
+                         }
+                         while( i < 10 );
+                         j;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 50 ) );
+        }
+
+        [Test]
         public void while_loop_with_empty_block_works()
         {
             string s = @"var i = 0;
@@ -218,6 +235,16 @@ namespace CK.Javascript.Tests
             RuntimeObj o = ScriptEngine.Evaluate( s );
             Assert.IsInstanceOf<RefRuntimeObj>( o );
             Assert.That( o.ToDouble(), Is.EqualTo( 11 ) );
+        }
+
+        [Test]
+        public void do_while_loop_expects_a_block()
+        {
+            string s = @"var i = 0;
+                         do i++; while( i < 10 );
+                         i;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RuntimeError>( o );
         }
 
         [Test]
@@ -234,6 +261,23 @@ namespace CK.Javascript.Tests
             RuntimeObj o = ScriptEngine.Evaluate( s );
             Assert.IsInstanceOf<RefRuntimeObj>( o );
             Assert.That( o.ToString(), Is.EqualTo( "aaaaa" ) );
+        }
+
+        [Test]
+        public void do_while_loop_support_break_statement()
+        {
+            string s = @"
+                        var i = 0, j = '';
+                        do
+                        {
+                            if( i++ >= 4 ) break;
+                            j += 'a';
+                        }
+                        while( i < 1000 );
+                        j;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToString(), Is.EqualTo( "aaaa" ) );
         }
 
         [Test]

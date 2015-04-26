@@ -48,9 +48,17 @@ namespace CK.Javascript
             {
                 for( ; ; )
                 {
-                    if( IsPendingOrSignal( ref _condition, Expr.Condition ) ) return PendingOrSignal( _condition );
-                    if( !_condition.Result.ToBoolean() ) break;
+                    if( !Expr.DoWhile )
+                    {
+                        if( IsPendingOrSignal( ref _condition, Expr.Condition ) ) return PendingOrSignal( _condition );
+                        if( !_condition.Result.ToBoolean() ) break;
+                    }
                     if( IsPendingOrSignal( ref _code, Expr.Code ) ) return PendingOrSignal( _code );
+                    if( Expr.DoWhile )
+                    {
+                        if( IsPendingOrSignal( ref _condition, Expr.Condition ) ) return PendingOrSignal( _condition );
+                        if( !_condition.Result.ToBoolean() ) break;
+                    }
                     _condition = _code = new PExpr();
                 }
                 return SetResult( RuntimeObj.Undefined );

@@ -128,6 +128,7 @@ namespace CK.Javascript
                 if( _parser.MatchIdentifier( "var" ) ) return HandleVar();
                 if( _parser.MatchIdentifier( "while" ) ) return HandleWhile();
                 if( _parser.MatchIdentifier( "break" ) ) return new BreakOrReturnExpr( _parser.PrevNonCommentLocation );
+                if( _parser.MatchIdentifier( "do" ) ) return HandleDoWhile();
                 return HandleIdentifier();
             }
             if( _parser.Match( JSTokeniserToken.OpenCurly ) ) return HandleBlock();
@@ -203,23 +204,44 @@ namespace CK.Javascript
         Expr HandleIf()
         {
             SourceLocation location = _parser.PrevNonCommentLocation;
-            if( !_parser.Match( JSTokeniserToken.OpenPar ) ) return new SyntaxErrorExpr( _parser.Location, "Expected '('." );
-            Expr c = Expression( 0 );
-            if( !_parser.Match( JSTokeniserToken.ClosePar ) ) return new SyntaxErrorExpr( _parser.Location, "Expected ')'." );
+            Expr c;
+            if( !IsCondition( out c ) ) return c;
             Expr whenTrue = HandleStatement();
             Expr whenFalse = null;
             if( _parser.MatchIdentifier( "else" ) ) whenFalse = HandleStatement();
             return new IfExpr( location, false, c, whenTrue, whenFalse );
         }
 
+        bool IsCondition( out Expr c )
+        {
+            if( !_parser.Match( JSTokeniserToken.OpenPar ) ) c = new SyntaxErrorExpr( _parser.Location, "Expected '('." );
+            else
+            {
+                c = Expression( 0 );
+                if( _parser.Match( JSTokeniserToken.ClosePar ) ) return true;
+                c = new SyntaxErrorExpr( _parser.Location, "Expected ')'." );
+            }
+            return false;
+        }
+
         Expr HandleWhile()
         {
             SourceLocation location = _parser.PrevNonCommentLocation;
-            if( !_parser.Match( JSTokeniserToken.OpenPar ) ) return new SyntaxErrorExpr( _parser.Location, "Expected '('." );
-            Expr c = Expression( 0 );
-            if( !_parser.Match( JSTokeniserToken.ClosePar ) ) return new SyntaxErrorExpr( _parser.Location, "Expected ')'." );
+            Expr c;
+            if( !IsCondition( out c ) ) return c;
             Expr code = HandleStatement();
             return new WhileExpr( location, c, code );
+        }
+
+        Expr HandleDoWhile()
+        {
+            SourceLocation location = _parser.PrevNonCommentLocation;
+            if( !_parser.Match( JSTokeniserToken.OpenCurly ) ) return new SyntaxErrorExpr( _parser.Location, "Expected '{{'." );
+            Expr code = HandleBlock();
+            if( !_parser.MatchIdentifier( "while" ) ) return new SyntaxErrorExpr( _parser.Location, "Expected 'while'." );
+            Expr c;
+            if( !IsCondition( out c ) ) return c;
+            return new WhileExpr( location, true, c, code );
         }
 
         Expr HandleStatement()
