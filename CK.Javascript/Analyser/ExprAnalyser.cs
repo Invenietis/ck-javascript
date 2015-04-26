@@ -196,7 +196,7 @@ namespace CK.Javascript
             }
             JSTokeniserToken binaryTokenType = JSTokeniser.FromAssignOperatorToBinary( _parser.CurrentToken );
             _parser.Forward();
-            return new AssignExpr( location, a, new BinaryExpr( location, left, binaryTokenType, Expression( JSTokeniser.PrecedenceLevel( binaryTokenType ) ) ) );
+            return new AssignExpr( location, a, new BinaryExpr( location, left, binaryTokenType, Expression( 0 ) ) );
         }
 
         Expr HandleIf()

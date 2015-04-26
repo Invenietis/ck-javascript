@@ -193,17 +193,17 @@ namespace CK.Javascript
                                 }
                             case (int)JSTokeniserToken.BitwiseShiftLeft & 15:
                                 {
-                                    result = BitwiseShift( left, right, ( i, shift ) => i << shift );
+                                    result = BitwiseShift( left, right, false );
                                     break;
                                 }
                             case (int)JSTokeniserToken.BitwiseShiftRight & 15:
                                 {
-                                    result = BitwiseShift( left, right, ( i, shift ) => i >> shift );
+                                    result = BitwiseShift( left, right, true );
                                     break;
                                 }
                             case (int)JSTokeniserToken.BitwiseShiftRightNoSignBit & 15:
                                 {
-                                    result = BitwiseShift( left, right, ( i, shift ) => (long)((ulong)i >> shift) );
+                                    result = BitwiseShift( left, right, ( i, shift ) => Math.Abs(i) >> shift );
                                     break;
                                 }
                             default:
@@ -222,24 +222,31 @@ namespace CK.Javascript
                 return SetResult( result );
             }
 
+            RuntimeObj BitwiseShift( RuntimeObj val, RuntimeObj shift, bool right )
+            {
+                if( val == Global.Zero ) return val;
+                double dR = shift.ToDouble();
+                int iShift;
+                if( Double.IsNaN( dR ) || (iShift = (dR < 0 ? (int)Math.Ceiling( dR ) : (int)Math.Floor( dR )) % 64) == 0 ) return Global.CreateNumber( val );
+                if( right && iShift < 0 ) return Global.Zero;
+                Int32 lN = JSSupport.ToInt32( val.ToDouble() );
+                if( lN == 0 ) return Global.Zero;
+                return Global.CreateNumber( right ? lN >> iShift : lN << iShift );
+            }
+
             RuntimeObj BitwiseShift( RuntimeObj left, RuntimeObj right, Func<Int64, int, Int64> f )
             {
-                Int64 lN = JSSupport.ToInt64( left.ToDouble() );
-                if( lN == 0 )
-                {
-                    return Global.Zero;
-                }
+                if( left == Global.Zero ) return left;
+                
                 double dR = right.ToDouble();
-                if( Double.IsNaN( dR ) || dR > 64 )
-                {
-                    return Global.CreateNumber( lN );
-                }
-                if( dR < 0 )
-                {
-                    return Global.Zero;
-                }
-                int shift = Convert.ToInt32( dR );
-                return Global.CreateNumber( f( lN, shift ) );
+                if( Double.IsNaN( dR ) ) return Global.CreateNumber( left );
+                int iShift = (dR < 0 ? (int)Math.Ceiling( dR ) : (int)Math.Floor( dR )) % 64;
+                if( iShift < 0 ) return Global.Zero;
+
+                UInt32 lN = (UInt32)JSSupport.ToInt64( left.ToDouble() );
+                if( lN == 0 ) return Global.Zero;
+
+                return Global.CreateNumber( lN >> iShift );
             }
         }
 

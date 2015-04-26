@@ -120,6 +120,87 @@ namespace CK.Javascript.Tests
             IsNumber( "~7|1", -7 );
         }
 
+        [TestCase( "3701 >> 2", 925 )]
+        [TestCase( "3701.9 >> 2", 925 )]
+        [TestCase( "3701.1 >> 2", 925 )]
+
+        [TestCase( "3701 >> 0",  3701 )]
+        [TestCase( "3701 >> -1",  0 )]
+        [TestCase( "3701 >> -0.2", 3701 )]
+        [TestCase( "3701 >> -0.7",  3701 )]
+
+        [TestCase( "3701 >> -2", 0 )]
+        [TestCase( "3701 >> -2.1", 0 )]
+        [TestCase( "3701 >> -2.8", 0 )]
+        [TestCase( "3701 >> 63", 0 )]
+        [TestCase( "3701 >> 64", 3701 )]
+        [TestCase( "3701.47 >> 64", 3701.47 )]
+        [TestCase( "3701 >> 63.5", 0 )]
+        [TestCase( "3701 >> 64.2", 3701 )]
+        [TestCase( "3701 >> 64.8", 3701 )]
+        [TestCase( "3701 >> 'NaN' ",  3701 )]
+
+        [TestCase( "-3701 >> 1", -1851 )]
+        [TestCase( "-3701 >> 65", -1851 )]
+        [TestCase( "-3701 >> 2", -926 )]
+        [TestCase( "-3701 >> 66", -926 )]
+        [TestCase( "-3701.9 >> 2", -926 )]
+        [TestCase( "-3701.1 >> 2", -926 )]
+        public void biwise_shift_right( string s, double v )
+        {
+            Console.WriteLine( "{0} === {1}", s, v );
+            IsNumber( s, v );
+        }
+
+        [TestCase( "3701 << 2", 14804 )]
+        [TestCase( "3701 << 2.1", 14804 )]
+        [TestCase( "3701 << 2.8", 14804 )]
+        [TestCase( "3701 << 0", 3701 )]
+        [TestCase( "3701 << -1", -2147483648 )]
+        [TestCase( "3701 << -0.7", 3701 )]
+        [TestCase( "3701 << -0.2", 3701 )]
+        [TestCase( "3701 << -2 ", 1073741824 )]
+        [TestCase( "3701 << 63 ", -2147483648 )]
+        [TestCase( "3701 << 64 ", 3701 )]
+        [TestCase( "3701 << 'NaN'", 3701 )]
+        [TestCase( "-3701 << 2", -14804 )]
+        [TestCase( "-3701 << -2", -1073741824 )]
+        [TestCase( "-3701 << -3", 1610612736 )]
+        [TestCase( "-3701 << -4", -1342177280 )]
+        [TestCase( "-3701 << -5", 1476395008 )]
+        [TestCase( "-3701 << -6", 738197504 )]
+        [TestCase( "-3701 << -7", 369098752 )]
+        [TestCase( "-3701 << -8", -1962934272 )]
+        [TestCase( "-3701 << -9", -981467136 )]
+        [TestCase( "-3701 << -10", 1656750080 )]
+        public void biwise_shift_left( string s, double v )
+        {
+            Console.WriteLine( "{0} === {1}", s, v );
+            IsNumber( s, v );
+        }
+
+        [TestCase( "3701 >>> 2 ", 925 )]
+        [TestCase( "3701 >>> 0 ", 3701 )]
+        [TestCase( "3701 >>> -0.2 ", 3701 )]
+        [TestCase( "3701 >>> -0.8 ", 3701 )]
+        [TestCase( "3701 >>> -1 ", 0 )]
+        [TestCase( "3701 >>> -1.2 ", 0 )]
+        [TestCase( "3701 >>> -2 ", 0 )]
+        [TestCase( "3701 >>> -64 ", 3701 )]
+        [TestCase( "3701 >>> -65 ", 0 )]
+        [TestCase( "3701 >>> 'NaN' ", 3701 )]
+        [TestCase( "-3701 >>> 2 ", 1073740898 )]
+        [TestCase( "-3701 >>> 10 ", 4194300 )]
+        [TestCase( "-3701 >>> 63 ", 1 )]
+        [TestCase( "-3701 >>> 64 ", 4294963595 )]
+        [TestCase( "-3701 >>> 65 ", 2147481797 )]
+        [TestCase( "-3701 >>> 66 ", 1073740898 )]
+        public void biwise_unsigned_shift_right( string s, double v )
+        {
+            Console.WriteLine( "{0} === {1}", s, v );
+            IsNumber( s, v );
+        }
+
         [Test]
         public void ternary_operator()
         {
@@ -128,6 +209,15 @@ namespace CK.Javascript.Tests
             IsNumber( "'' ? 1+1 : 3+3", 6 );
             IsNumber( "' ' ? 1+1 : false", 2 );
             IsNumber( "'false' ? ~45*8 : 's'", ~45 * 8.0, "The string 'false' is true." );
+        }
+
+        [Test]
+        public void modulo_returns_a_value_with_the_sign_of_the_first_number()
+        {
+            IsBoolean( "45 % 10 == 5", true );
+            IsBoolean( "45 % -10 == 5", true );
+            IsBoolean( "-45 % 10 == -5", true );
+            IsBoolean( "-45 % -10 == -5", true );
         }
 
         [Test]

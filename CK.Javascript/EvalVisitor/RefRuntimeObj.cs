@@ -85,7 +85,7 @@ namespace CK.Javascript
 
         public override PExpr Visit( IAccessorFrame frame )
         {
-            return new PExpr( this );
+            return _value.Visit( frame );
         }
     }
 

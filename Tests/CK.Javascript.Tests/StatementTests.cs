@@ -81,7 +81,60 @@ namespace CK.Javascript.Tests
             Assert.IsInstanceOf<RefRuntimeObj>( o );
             Assert.That( o.ToDouble(), Is.EqualTo( 3712 ) );
         }
-        
+
+
+        [Test]
+        public void number_assignment_operators_are_supported()
+        {
+            string s = @"   var i = 0;
+                            var bug = '';
+
+                            i += 0+1; i *= 2*1; i <<= 1<<0; i -= 7-6;
+                            if( i !== (((0+1)*(2*1))<<(1<<0))-(7-6) ) bug = 'Bug in +, *, << or -';
+
+                            // i = 3
+                            i += 4; i &= 2 | 1; 
+                            if( i !== (7&2|1) ) bug = 'Bug in &';
+
+                            // i = 3
+                            i |= 7+1;
+                            if( i !== 11 ) bug = 'Bug in |';
+
+                            // i = 11
+                            i >>= 1+1;
+                            if( i !== 2 ) bug = 'Bug in >>';
+
+                            // i = 2
+                            i ^= 1+8;
+                            if( i !== (2^(1+8)) ) bug = 'Bug in ^';
+
+                            // i = 11
+                            i ^= -3712;
+                            if( i !== (11^-3712) ) bug = 'Bug in ~';
+
+                            // i = -3701
+                            i >>>= 2;
+                            if( i !== (-3701>>>2) || i !== 1073740898 ) bug = 'Bug in >>>';
+
+                            // i = 1073740898;
+                            i &= 2|4|32|512|4096;
+                            if( i !== 1073740898 & (2|4|32|512|4096) ) bug = 'Bug in &';
+
+                            // i = 4130
+                            i %= -(1+5+3);
+                            if( i !== (4130%-(1+5+3)) || i !== 8 ) bug = 'Bug in %';
+                            
+                            i = 8;
+                            i /= 3.52;
+                            if( i !== 8/3.52 ) bug = 'Bug in /';
+                        
+                            bug.toString();
+";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalString>( o );
+            Assert.That( o.ToString(), Is.EqualTo( String.Empty ) );
+        }
+
         [Test]
         public void simple_if_block()
         {
