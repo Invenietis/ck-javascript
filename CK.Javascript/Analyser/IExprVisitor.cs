@@ -48,6 +48,6 @@ namespace CK.Javascript
         T Visit( NopExpr e );
         T Visit( PrePostIncDecExpr e );
         T Visit( WhileExpr e );
-        T Visit( BreakOrReturnExpr e );
+        T Visit( FlowBreakingExpr e );
     }
 }

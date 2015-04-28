@@ -62,7 +62,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Analyser\Expressions\BreakOrReturnExpr.cs" />
+    <Compile Include="Analyser\Expressions\FlowBreakingExpr.cs" />
     <Compile Include="Analyser\Expressions\ListOfExpr.cs" />
     <Compile Include="Analyser\Expressions\WhileExpr.cs" />
     <Compile Include="Analyser\Expressions\PrePostIncDecExpr.cs" />
@@ -78,7 +78,7 @@
     <Compile Include="Analyser\StaticScope.cs" />
     <Compile Include="EvalVisitor\DynamicScope.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.Accessors.cs" />
-    <Compile Include="EvalVisitor\EvalVisitor.Expr.BreakOrReturn.cs" />
+    <Compile Include="EvalVisitor\EvalVisitor.Expr.FlowBreaking.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.ListOf.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.Block.cs" />
     <Compile Include="EvalVisitor\EvalVisitor.Expr.Assign.cs" />

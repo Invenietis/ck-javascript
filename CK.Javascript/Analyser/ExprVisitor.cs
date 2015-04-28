@@ -151,10 +151,10 @@ namespace CK.Javascript
             return cV == e.Condition && oV == e.Code ? e : new WhileExpr( e.Location, cV, oV );
         }
 
-        public virtual Expr Visit( BreakOrReturnExpr e )
+        public virtual Expr Visit( FlowBreakingExpr e )
         {
-            var rV = e.Returns != null ? VisitExpr( e.Returns ) : null;
-            return rV == e.Returns ? e : new BreakOrReturnExpr( e.Location, e.IsReturn, rV );
+            var rV = e.Parameter != null ? VisitExpr( e.Parameter ) : null;
+            return rV == e.Parameter ? e : new FlowBreakingExpr( e.Location, e.Type, rV );
         }
 
     }

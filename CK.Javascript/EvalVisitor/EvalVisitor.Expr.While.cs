@@ -53,7 +53,19 @@ namespace CK.Javascript
                         if( IsPendingOrSignal( ref _condition, Expr.Condition ) ) return PendingOrSignal( _condition );
                         if( !_condition.Result.ToBoolean() ) break;
                     }
-                    if( IsPendingOrSignal( ref _code, Expr.Code ) ) return PendingOrSignal( _code );
+                    if( IsPendingOrSignal( ref _code, Expr.Code ) )
+                    {
+                        if( _code.IsSignal )
+                        {
+                            RuntimeFlowBreaking b = _code.Result as RuntimeFlowBreaking;
+                            if( b != null && b.Expr.Type == FlowBreakingExpr.BreakingType.Continue )
+                            {
+                                _condition = _code = new PExpr();
+                                continue;
+                            }
+                        }
+                        return PendingOrSignal( _code );
+                    }
                     if( Expr.DoWhile )
                     {
                         if( IsPendingOrSignal( ref _condition, Expr.Condition ) ) return PendingOrSignal( _condition );
@@ -66,10 +78,18 @@ namespace CK.Javascript
 
             protected override bool OnSignal( ref RuntimeObj result )
             {
-                if( result is RuntimeBreak )
+                RuntimeFlowBreaking b = result as RuntimeFlowBreaking;
+                if( b != null )
                 {
-                    result = RuntimeObj.Undefined;
-                    return true;
+                    if( b.Expr.Type ==  FlowBreakingExpr.BreakingType.Break )
+                    {
+                        result = RuntimeObj.Undefined;
+                        return true;
+                    }
+                    if( b.Expr.Type == FlowBreakingExpr.BreakingType.Return )
+                    {
+                        return true;
+                    }
                 }
                 return base.OnSignal( ref result );
             }

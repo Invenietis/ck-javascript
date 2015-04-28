@@ -68,7 +68,7 @@ namespace CK.Javascript
                     return r;
                 }
 
-                #region Auto implemented access to resolved arguments (avoid an allocation).
+                #region Auto implemented access to resolved arguments (avoids an allocation).
                 RuntimeObj IReadOnlyList<RuntimeObj>.this[int index]
                 {
                     get { return _args[index].Result; }

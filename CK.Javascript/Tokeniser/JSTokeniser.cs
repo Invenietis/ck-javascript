@@ -396,7 +396,7 @@ namespace CK.Javascript
         }
 
         /// <summary>
-        /// Reads a comment (with its opening and closing tags) and forwards head. Returns null and 
+        /// Reads a comment (with its opening and closing tags) and forwards head. Parameter null and 
         /// does not forward the head if current token is not a comment. 
         /// To be able to read comments (ie. returning not null here) requires <see cref="SkipComments"/> to be false.
         /// </summary>
@@ -407,7 +407,7 @@ namespace CK.Javascript
         }
 
         /// <summary>
-        /// Reads a string value and forwards head. Returns null and 
+        /// Reads a string value and forwards head. Parameter null and 
         /// does not forward the head if current token is not a string. 
         /// </summary>
         /// <returns></returns>
@@ -418,7 +418,7 @@ namespace CK.Javascript
 
 
         /// <summary>
-        /// Reads an identifier and forwards head. Returns null and 
+        /// Reads an identifier and forwards head. Parameter null and 
         /// does not forward the head if current token is not an identifier. 
         /// </summary>
         /// <returns></returns>
@@ -435,7 +435,7 @@ namespace CK.Javascript
 
         /// <summary>
         /// Reads a dotted identifier and forwards head (stops on any non identifier nor dot token). 
-        /// Returns null and does not forward the head if current token is not an identifier. 
+        /// Parameter null and does not forward the head if current token is not an identifier. 
         /// </summary>
         /// <remarks>
         /// If the identifier ends with a dot, this last dot is kept in the result.
@@ -462,7 +462,7 @@ namespace CK.Javascript
 
         /// <summary>
         /// Reads an identifier that may be a string or a number (i.e. <c>myId</c> or <c>'My Identifier'</c> or <c>0.112E3</c>) and forwards head. 
-        /// Returns null and does not forward the head if current token is not an identifier nor a string nor a number.
+        /// Parameter null and does not forward the head if current token is not an identifier nor a string nor a number.
         /// Useful for reading javascript objects since a Javascript key can be any of these tokens.
         /// </summary>
         /// <returns></returns>
@@ -474,7 +474,7 @@ namespace CK.Javascript
         }
 
         /// <summary>
-        /// Reads an identifier and forwards head. Returns false and 
+        /// Reads an identifier and forwards head. Parameter false and 
         /// does not forward the head if current token is not an identifier. 
         /// </summary>
         /// <returns></returns>
@@ -899,7 +899,7 @@ namespace CK.Javascript
         }
 
         /// <summary>
-        /// Returns the number of processed digits.
+        /// Parameter the number of processed digits.
         /// </summary>
         private int IsPositiveHexNumber( out ulong val, int maxNbDigit )
         {

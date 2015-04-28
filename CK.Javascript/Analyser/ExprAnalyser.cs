@@ -127,7 +127,8 @@ namespace CK.Javascript
                 if( _parser.MatchIdentifier( "if" ) ) return HandleIf();
                 if( _parser.MatchIdentifier( "var" ) ) return HandleVar();
                 if( _parser.MatchIdentifier( "while" ) ) return HandleWhile();
-                if( _parser.MatchIdentifier( "break" ) ) return new BreakOrReturnExpr( _parser.PrevNonCommentLocation );
+                if( _parser.MatchIdentifier( "break" ) ) return new FlowBreakingExpr( _parser.PrevNonCommentLocation, FlowBreakingExpr.BreakingType.Break );
+                if( _parser.MatchIdentifier( "continue" ) ) return new FlowBreakingExpr( _parser.PrevNonCommentLocation, FlowBreakingExpr.BreakingType.Continue );
                 if( _parser.MatchIdentifier( "do" ) ) return HandleDoWhile();
                 return HandleIdentifier();
             }

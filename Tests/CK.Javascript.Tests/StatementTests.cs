@@ -183,6 +183,7 @@ namespace CK.Javascript.Tests
             Assert.That( o.ToDouble(), Is.EqualTo( 4 ) );
         }
 
+
         [Test]
         public void while_loop_works()
         {
@@ -192,6 +193,16 @@ namespace CK.Javascript.Tests
             RuntimeObj o = ScriptEngine.Evaluate( s );
             Assert.IsInstanceOf<RefRuntimeObj>( o );
             Assert.That( o.ToDouble(), Is.EqualTo( 10 ) );
+        }
+        [Test]
+        public void while_loop_with_empty_block_works()
+        {
+            string s = @"var i = 0;
+                         while( i++ < 10 );
+                         i;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 11 ) );
         }
 
         [Test]
@@ -227,17 +238,6 @@ namespace CK.Javascript.Tests
         }
 
         [Test]
-        public void while_loop_with_empty_block_works()
-        {
-            string s = @"var i = 0;
-                         while( i++ < 10 );
-                         i;";
-            RuntimeObj o = ScriptEngine.Evaluate( s );
-            Assert.IsInstanceOf<RefRuntimeObj>( o );
-            Assert.That( o.ToDouble(), Is.EqualTo( 11 ) );
-        }
-
-        [Test]
         public void do_while_loop_expects_a_block()
         {
             string s = @"var i = 0;
@@ -255,6 +255,22 @@ namespace CK.Javascript.Tests
                         while( true )
                         {
                             if( i++ >= 5 ) break;
+                            j += 'a';
+                        }
+                        j;";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<RefRuntimeObj>( o );
+            Assert.That( o.ToString(), Is.EqualTo( "aaaaa" ) );
+        }
+
+        [Test]
+        public void while_loop_support_continue_statement()
+        {
+            string s = @"
+                        var i = 0, j = '';
+                        while( ++i < 10 )
+                        {
+                            if( i%2 == 0 ) continue;
                             j += 'a';
                         }
                         j;";

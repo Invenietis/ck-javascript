@@ -34,29 +34,29 @@ namespace CK.Javascript
 
     public partial class EvalVisitor
     {
-        class BreakOrReturnExprFrame : Frame<BreakOrReturnExpr>
+        class FlowBreakingExprFrame : Frame<FlowBreakingExpr>
         {
             PExpr _returns;
 
-            public BreakOrReturnExprFrame( EvalVisitor evaluator, BreakOrReturnExpr e )
+            public FlowBreakingExprFrame( EvalVisitor evaluator, FlowBreakingExpr e )
                 : base( evaluator, e )
             {
             }
 
             protected override PExpr DoVisit()
             {
-                if( Expr.Returns != null )
+                if( Expr.Parameter != null )
                 {
-                    if( IsPendingOrSignal( ref _returns, Expr.Returns ) ) return PendingOrSignal( _returns );
-                    return SetResult( new RuntimeBreak( Expr, _returns.Result ) );
+                    if( IsPendingOrSignal( ref _returns, Expr.Parameter ) ) return PendingOrSignal( _returns );
+                    return SetResult( new RuntimeFlowBreaking( Expr, _returns.Result ) );
                 }
-                return SetResult( new RuntimeBreak( Expr ) );
+                return SetResult( new RuntimeFlowBreaking( Expr ) );
             }
         }
 
-        public PExpr Visit( BreakOrReturnExpr e )
+        public PExpr Visit( FlowBreakingExpr e )
         {
-            return new BreakOrReturnExprFrame( this, e ).Visit();
+            return new FlowBreakingExprFrame( this, e ).Visit();
         }
 
     }

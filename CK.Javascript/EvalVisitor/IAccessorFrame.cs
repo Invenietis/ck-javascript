@@ -46,7 +46,7 @@ namespace CK.Javascript
         GlobalContext Global { get; }
 
         /// <summary>
-        /// Initialize an accessor state based on a configuration. Returns null if no matching configuration have been found.
+        /// Initialize an accessor state based on a configuration. Parameter null if no matching configuration have been found.
         /// </summary>
         /// <param name="configuration">Configuration of resolution handlers.</param>
         /// <returns>Null if no matching configuration have been found.</returns>

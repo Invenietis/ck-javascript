@@ -199,7 +199,7 @@ namespace CK.Javascript
                                 }
                             case (int)JSTokeniserToken.BitwiseShiftRightNoSignBit & 15:
                                 {
-                                    result = BitwiseShift( left, right, ( i, shift ) => Math.Abs(i) >> shift );
+                                    result = BitwiseShiftRightUnsigned( left, right );
                                     break;
                                 }
                             default: throw UnsupportedOperatorException();
@@ -228,7 +228,7 @@ namespace CK.Javascript
                 return Global.CreateNumber( right ? lN >> iShift : lN << iShift );
             }
 
-            RuntimeObj BitwiseShift( RuntimeObj left, RuntimeObj right, Func<Int64, int, Int64> f )
+            RuntimeObj BitwiseShiftRightUnsigned( RuntimeObj left, RuntimeObj right )
             {
                 if( left == Global.Zero ) return left;
                 

@@ -28,19 +28,21 @@ using System.Text;
 
 namespace CK.Javascript
 {
-    public class RuntimeBreak : RuntimeSignal
+    public class RuntimeFlowBreaking : RuntimeSignal
     {
-        public RuntimeBreak( Expr e, RuntimeObj value = null )
+        public RuntimeFlowBreaking( FlowBreakingExpr e, RuntimeObj value = null )
             : base( e )
         {
             Value = value;
         }
 
+        public new FlowBreakingExpr Expr { get { return (FlowBreakingExpr)base.Expr; } }
+
         public RuntimeObj Value { get; private set; }
 
         public override string ToString()
         {
-            return "Break: " + Expr.ToString();
+            return Expr.ToString();
         }
     }
 

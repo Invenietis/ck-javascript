@@ -89,6 +89,7 @@ namespace CK.Javascript
                     return new PExpr( this );
                 }
                 PExpr r = DoVisit();
+                Debug.Assert( r.Result == _result && (r.Deferred == null || r.Deferred == this ) );
                 if( _result != null )
                 {
                     if( !(_result is RuntimeSignal) || OnSignal( ref _result ) )
