@@ -127,9 +127,11 @@ namespace CK.Javascript
                 if( _parser.MatchIdentifier( "if" ) ) return HandleIf();
                 if( _parser.MatchIdentifier( "var" ) ) return HandleVar();
                 if( _parser.MatchIdentifier( "while" ) ) return HandleWhile();
-                if( _parser.MatchIdentifier( "break" ) ) return new FlowBreakingExpr( _parser.PrevNonCommentLocation, FlowBreakingExpr.BreakingType.Break );
-                if( _parser.MatchIdentifier( "continue" ) ) return new FlowBreakingExpr( _parser.PrevNonCommentLocation, FlowBreakingExpr.BreakingType.Continue );
+                if( _parser.MatchIdentifier( "break" ) ) return new FlowBreakingExpr( _parser.PrevNonCommentLocation, false );
+                if( _parser.MatchIdentifier( "continue" ) ) return new FlowBreakingExpr( _parser.PrevNonCommentLocation, true );
+                if( _parser.MatchIdentifier( "return" ) ) return HandleReturn();
                 if( _parser.MatchIdentifier( "do" ) ) return HandleDoWhile();
+                if( _parser.MatchIdentifier( "function" ) ) return HandleFunction();
                 return HandleIdentifier();
             }
             if( _parser.Match( JSTokeniserToken.OpenCurly ) ) return HandleBlock();
@@ -159,7 +161,14 @@ namespace CK.Javascript
             return new SyntaxErrorExpr( _parser.Location, "Syntax Error." );
         }
 
-        private Expr HandlePostIncDec( Expr left )
+        Expr HandleReturn()
+        {
+            var loc = _parser.PrevNonCommentLocation;
+            Expr r = _parser.CurrentToken == JSTokeniserToken.SemiColon ? NopExpr.Default : Expression( 0 );
+            return new FlowBreakingExpr( _parser.PrevNonCommentLocation, r );
+        }
+
+        Expr HandlePostIncDec( Expr left )
         {
             var loc = _parser.Location;
             var t = _parser.CurrentToken;
@@ -186,6 +195,42 @@ namespace CK.Javascript
             while( _parser.Match( JSTokeniserToken.Comma ) );
             if( multi.Count == 1 ) return multi[0];
             return new ListOfExpr( multi );
+        }
+
+        Expr HandleFunction()
+        {
+            var funcLocation = _parser.PrevNonCommentLocation;
+            string name = _parser.ReadIdentifier();
+            AccessorDeclVarExpr funcName = name != null ? new AccessorDeclVarExpr( _parser.PrevNonCommentLocation, name ) : null;
+            Expr eRegName = _scope.Declare( name, funcName );
+            if( eRegName is SyntaxErrorExpr ) return eRegName;
+
+            if( !_parser.Match( JSTokeniserToken.OpenPar ) ) return new SyntaxErrorExpr( _parser.Location, "Expected '('." );
+            _scope.OpenScope();
+            Expr error = HandleFuncHeader( name );
+            if( error != null )
+            {
+                _scope.CloseScope();
+                return error;
+            }
+            Expr body = HandleBlock();
+            var f = new FunctionExpr( funcLocation, _scope.CloseScope(), body, funcName );
+            if( funcName == null ) return f;
+            return new AssignExpr( funcLocation, funcName, f );
+        }
+
+        private Expr HandleFuncHeader( string name )
+        {
+            string pName;
+            while( (pName = _parser.ReadIdentifier()) != null )
+            {
+                AccessorDeclVarExpr param = new AccessorDeclVarExpr( _parser.PrevNonCommentLocation, pName );
+                Expr eRegParam = _scope.Declare( pName, param );
+                if( eRegParam is SyntaxErrorExpr ) return eRegParam;
+            }
+            if( !_parser.Match( JSTokeniserToken.ClosePar ) ) return new SyntaxErrorExpr( _parser.Location, "Expected ')'." );
+            if( !_parser.Match( JSTokeniserToken.OpenCurly ) ) return new SyntaxErrorExpr( _parser.Location, "Expected '{{}'." );
+            return null;
         }
 
         Expr HandleAssign( Expr left, bool pureAssign = false )
@@ -256,16 +301,17 @@ namespace CK.Javascript
             if( first == null ) _scope.OpenScope();
             List<Expr> statements = new List<Expr>();
             if( first != null && first != NopExpr.Default ) statements.Add( first );
-            while( (first == null && !_parser.Match( JSTokeniserToken.CloseCurly )) || !(first == null || _parser.IsEndOfInput) )
+            while( !_parser.Match( JSTokeniserToken.CloseCurly ) && !_parser.IsEndOfInput )
             {
                 Expr e = Expression( 0 );
                 _parser.Match( JSTokeniserToken.SemiColon );
                 if( e != NopExpr.Default ) statements.Add( e );
                 if( e is SyntaxErrorExpr ) break; 
             }
-            if( statements.Count == 0 ) return NopExpr.Default;
+            // Always close the scope.
             var locals = _scope.CloseScope();
-            if( statements.Count == 1 ) return statements[0];
+            if( statements.Count == 0 ) return NopExpr.Default;
+            if( statements.Count == 1 && locals.Count == 0 ) return statements[0];
             return new BlockExpr( statements.ToArray(), locals );
         }
 

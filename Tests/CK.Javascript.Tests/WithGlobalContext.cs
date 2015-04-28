@@ -56,7 +56,7 @@ namespace CK.Javascript.Tests
                     {
                         throw new CKException( "Accessing XXX.array other than 'An.Array' must not be found." );
                     } )
-                    .On( "Ghost" ).On( "M" ).OnCall( -1, ( f, args ) =>
+                    .On( "Ghost" ).On( "M" ).OnCall( ( f, args ) =>
                     {
                         Console.WriteLine( "Ghost.M() called with {0} arguments: {1} (=> returns {0}).", 
                                                 args.Count, 

@@ -29,37 +29,48 @@ using CK.Core;
 
 namespace CK.Javascript
 {
-    public class JSEvalBoolean : RuntimeObj
+    public class JSEvalFunction : RuntimeObj
     {
-        public static readonly JSEvalBoolean True = new JSEvalBoolean( true );
-        public static readonly JSEvalBoolean False = new JSEvalBoolean( false );
+        FunctionExpr _expr;
 
-        bool _value;
-
-        JSEvalBoolean( bool v )
+        public JSEvalFunction( FunctionExpr e )
         {
-            _value = v;
+            if( e == null ) throw new ArgumentNullException();
+            _expr = e;
+        }
+
+        public FunctionExpr Expr 
+        { 
+            get { return _expr; } 
         }
 
         public override string Type
         {
-            get { return RuntimeObj.TypeBoolean; }
+            get { return RuntimeObj.TypeObject; }
         }
 
         public override bool ToBoolean()
         {
-            return _value;
+            return true;
         }
 
         public override double ToDouble()
         {
-            return _value ? 1.0 : 0.0;
+            return Double.NaN;
         }
 
         public override string ToString()
         {
-            return _value ? JSSupport.TrueString : JSSupport.FalseString;
+            return _expr.ToString();
         }
 
+        public override PExpr Visit( IAccessorFrame frame )
+        {
+            if( frame.Expr is AccessorCallExpr )
+            {
+                return new EvalVisitor.FunctionExprFrame( (EvalVisitor.AccessorFrame)frame, _expr ).Visit();
+            }
+            return base.Visit( frame );
+        }
     }
 }

@@ -91,7 +91,7 @@ namespace CK.Javascript
         public override PExpr Visit( IAccessorFrame frame )
         {
             var s = frame.GetState( c =>
-                c.On( "toString" ).OnCall( 0, ( f, args ) =>
+                c.On( "toString" ).OnCall( ( f, args ) =>
                 {
                     return f.SetResult( f.Global.CreateString( JSSupport.ToString( _value ) ) );
                 }

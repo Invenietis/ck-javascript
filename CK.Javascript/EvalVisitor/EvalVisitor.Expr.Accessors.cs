@@ -34,61 +34,83 @@ namespace CK.Javascript
 
     public partial class EvalVisitor
     {
-        class AccessorFrame : Frame<AccessorExpr>, IAccessorFrame
+        class FrameStateBase : IReadOnlyList<RuntimeObj>
         {
-            class FrameState : IAccessorFrameState, IReadOnlyList<RuntimeObj>
+            protected readonly Frame Frame;
+            readonly IReadOnlyList<Expr> _arguments;
+            readonly PExpr[] _args;
+            int _rpCount;
+
+            public FrameStateBase( Frame frame, IReadOnlyList<Expr> arguments )
             {
-                readonly AccessorFrame _winner;
+                Frame = frame;
+                _arguments = arguments;
+                _args = new PExpr[_arguments.Count];
+            }
+
+            public PExpr VisitArguments()
+            {
+                while( _rpCount < _args.Length )
+                {
+                    if( Frame.IsPendingOrSignal( ref _args[_rpCount], _arguments[_rpCount] ) ) return Frame.PendingOrSignal( _args[_rpCount] );
+                    ++_rpCount;
+                }
+                return new PExpr( RuntimeObj.Undefined );
+            }
+
+            #region Auto implemented access to resolved arguments (avoids an allocation).
+                
+            public IReadOnlyList<RuntimeObj> ResolvedParameters { get { return this; } }
+
+            RuntimeObj IReadOnlyList<RuntimeObj>.this[int index]
+            {
+                get { return _args[index].Result; }
+            }
+
+            int IReadOnlyCollection<RuntimeObj>.Count
+            {
+                get { return _args.Length; }
+            }
+
+            IEnumerator<RuntimeObj> IEnumerable<RuntimeObj>.GetEnumerator()
+            {
+                return _args.Select( e => e.Result ).GetEnumerator();
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                return ((IEnumerable<RuntimeObj>)this).GetEnumerator();
+            }
+            #endregion
+        }      
+        
+        internal class AccessorFrame : Frame<AccessorExpr>, IAccessorFrame
+        {
+            class FrameState : FrameStateBase, IAccessorFrameState
+            {
                 readonly Func<IAccessorFrame, RuntimeObj, PExpr> _indexCode;
                 readonly Func<IAccessorFrame, IReadOnlyList<RuntimeObj>, PExpr> _callCode;
-                readonly PExpr[] _args;
-                int _rpCount;
 
                 public FrameState( AccessorFrame winner,
                                    Func<IAccessorFrame, RuntimeObj, PExpr> indexCode,
                                    Func<IAccessorFrame, IReadOnlyList<RuntimeObj>, PExpr> callCode,
-                                   PExpr[] args )
+                                   IReadOnlyList<Expr> arguments )
+                    : base( winner, arguments )
                 {
-                    _winner = winner;
                     _indexCode = indexCode;
                     _callCode = callCode;
-                    _args = args;
                 }
 
                 public PExpr Visit()
                 {
-                    _winner._initCount = 0;
-                    while( _rpCount < _args.Length )
-                    {
-                        if( _winner.IsPendingOrSignal( ref _args[_rpCount], _winner.Expr.Arguments[_rpCount] ) ) return _winner.PendingOrSignal( _args[_rpCount] );
-                        ++_rpCount;
-                    }
-                    var r = _indexCode != null ? _indexCode( _winner, _args[0].Result ) : _callCode( _winner, this );
-                    if( !r.IsResolved && r.Deferred != _winner ) throw new CKException( "Implementations must call either SetResult, SetError, or PendigOrSignal frame's method." );
+                    var f = (AccessorFrame)Frame;
+                    f._initCount = 0;
+                    PExpr args = VisitArguments();
+                    if( args.IsPendingOrSignal ) return args;
+                    var r = _indexCode != null ? _indexCode( f, ResolvedParameters[0] ) : _callCode( f, this );
+                    if( !r.IsResolved && r.Deferred != Frame ) throw new CKException( "Implementations must call either SetResult, SetError, or PendigOrSignal frame's method." );
                     return r;
                 }
-
-                #region Auto implemented access to resolved arguments (avoids an allocation).
-                RuntimeObj IReadOnlyList<RuntimeObj>.this[int index]
-                {
-                    get { return _args[index].Result; }
-                }
-
-                int IReadOnlyCollection<RuntimeObj>.Count
-                {
-                    get { return _args.Length; }
-                }
-
-                IEnumerator<RuntimeObj> IEnumerable<RuntimeObj>.GetEnumerator()
-                {
-                    return _args.Select( e => e.Result ).GetEnumerator();
-                }
-
-                System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-                {
-                    return ((IEnumerable<RuntimeObj>)this).GetEnumerator();
-                }
-                #endregion
             }
 
             class FrameInitializer : IAccessorFrameInitializer
@@ -119,22 +141,20 @@ namespace CK.Javascript
                     {
                         if( _current != null && _current.Expr is AccessorIndexerExpr )
                         {
-                            _state = new FrameState( _current, code, null, new PExpr[1] );
+                            _state = new FrameState( _current, code, null, _current.Expr.Arguments );
                         }
                         _current = _frame;
                     }
                     return this;
                 }
 
-                public IAccessorFrameInitializer OnCall( int maxParameterCount, Func<IAccessorFrame, IReadOnlyList<RuntimeObj>, PExpr> code )
+                public IAccessorFrameInitializer OnCall( Func<IAccessorFrame, IReadOnlyList<RuntimeObj>, PExpr> code )
                 {
                     if( _state == null )
                     {
                         if( _current != null && _current.Expr is AccessorCallExpr )
                         {
-                            int argCount = _current.Expr.Arguments.Count;
-                            if( maxParameterCount < 0 || maxParameterCount > argCount ) maxParameterCount = argCount;
-                            _state = new FrameState( _current, null, code, new PExpr[maxParameterCount] );
+                            _state = new FrameState( _current, null, code, _current.Expr.Arguments );
                         }
                         _current = _frame;
                     }
@@ -146,6 +166,7 @@ namespace CK.Javascript
             int _initCount;
             int _realInitCount;
             protected PExpr _left;
+            protected PExpr _result;
 
             internal protected AccessorFrame( EvalVisitor visitor, AccessorExpr e )
                 : base( visitor, e )
@@ -159,7 +180,15 @@ namespace CK.Javascript
             protected override PExpr DoVisit()
             {
                 if( IsPendingOrSignal( ref _left, Expr.Left ) ) return ReentrantPendingOrSignal( _left );
-                return Result != null ? new PExpr( Result ) : SetError();
+                if( Result != null ) return new PExpr( Result );
+                RefRuntimeObj l = _left.Result as RefRuntimeObj;
+                if( l != null )
+                {
+                    Debug.Assert( !_result.IsResolved );
+                    if( (_result = l.Value.Visit( this )).IsPendingOrSignal ) return ReentrantPendingOrSignal( _result );
+                    return ReentrantSetResult( _result.Result );
+                }
+                return SetError();
             }
 
             public IAccessorFrameState GetState( Action<IAccessorFrameInitializer> configuration )
@@ -239,8 +268,6 @@ namespace CK.Javascript
                 : base( visitor, e )
             {
             }
-
-            PExpr _result;
 
             protected override PExpr DoVisit()
             {

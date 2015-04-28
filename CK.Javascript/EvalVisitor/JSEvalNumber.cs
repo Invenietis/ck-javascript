@@ -31,6 +31,11 @@ namespace CK.Javascript
 {
     public class JSEvalNumber : RuntimeObj
     {
+        static public readonly JSEvalNumber NaN = new JSEvalNumber( Double.NaN );
+        static public readonly JSEvalNumber Zero = new JSEvalNumber( 0 );
+        static public readonly JSEvalNumber Infinity = new JSEvalNumber( Double.PositiveInfinity );
+        static public readonly JSEvalNumber NegativeInfinity = new JSEvalNumber( Double.NegativeInfinity );
+
         double _value;
 
         public JSEvalNumber( double value )
@@ -66,7 +71,7 @@ namespace CK.Javascript
         public override PExpr Visit( IAccessorFrame frame )
         {
             var s = frame.GetState( c => 
-                c.On("toString").OnCall( 1, (f,args) => 
+                c.On("toString").OnCall( (f,args) => 
                 {
                     int radix = 10;
                     if( args.Count == 1 ) radix = JSSupport.ToInt32( args[0].ToDouble() );

@@ -60,7 +60,7 @@ namespace CK.Javascript
         {
             if( ReferenceEquals( X, Y ) )
             {
-                return X != c.NaN;
+                return X != JSEvalNumber.NaN;
             }
             if( ReferenceEquals( X.Type, Y.Type ) )
             {
@@ -138,7 +138,7 @@ namespace CK.Javascript
         {
             if( ReferenceEquals( X, Y ) )
             {
-                return X != c.NaN;
+                return X != JSEvalNumber.NaN;
             }
 
             if( !ReferenceEquals( X.Type, Y.Type ) ) return false;
@@ -146,7 +146,7 @@ namespace CK.Javascript
 
             if( ReferenceEquals( X.Type, RuntimeObj.TypeNumber ) )
             {
-                if( X == c.NaN || Y == c.NaN )
+                if( X == JSEvalNumber.NaN || Y == JSEvalNumber.NaN )
                 {
                     return false;
                 }

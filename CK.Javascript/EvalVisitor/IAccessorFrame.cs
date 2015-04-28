@@ -46,7 +46,7 @@ namespace CK.Javascript
         GlobalContext Global { get; }
 
         /// <summary>
-        /// Initialize an accessor state based on a configuration. Parameter null if no matching configuration have been found.
+        /// Initialize an accessor state based on a configuration. ReturnedValue null if no matching configuration have been found.
         /// </summary>
         /// <param name="configuration">Configuration of resolution handlers.</param>
         /// <returns>Null if no matching configuration have been found.</returns>
@@ -68,7 +68,7 @@ namespace CK.Javascript
         /// Resolves this frame with an error and returns a resolved promise.
         /// </summary>
         /// <param name="message">
-        /// An optional error message. When let to null, a default message describing the error is generated ("unknown property 'f'." for example).
+        /// An optional error message. When let to null, a default message describing the error is generated ("unknown field or property 'x'." for example).
         /// </param>
         PExpr SetError( string message = null );
 

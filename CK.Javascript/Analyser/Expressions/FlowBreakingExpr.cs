@@ -19,12 +19,27 @@ namespace CK.Javascript
             Return
         }
 
-        public FlowBreakingExpr( SourceLocation location, BreakingType type, Expr parameter = null )
+        public FlowBreakingExpr( SourceLocation location, bool isContinue )
             : base( location, true )
         {
-            if( type == BreakingType.None ) throw new ArgumentException( "type" );
+            Type = isContinue ? BreakingType.Continue : BreakingType.Break;
+        }
+
+        public FlowBreakingExpr( SourceLocation location, Expr returnValue )
+            : base( location, true )
+        {
+            if( returnValue == null ) throw new ArgumentNullException( "returnValue" );
+            Type = BreakingType.Return;
+            ReturnedValue = returnValue;
+        }
+
+        public FlowBreakingExpr( SourceLocation location, BreakingType type, Expr returnValue )
+            : base( location, true )
+        {
+            if( type == BreakingType.None ) throw new ArgumentNullException( "type" );
+            if( type == BreakingType.Return && returnValue == null ) throw new ArgumentNullException( "returnValue" );
             Type = type;
-            Parameter = parameter;
+            ReturnedValue = returnValue;
         }
 
         /// <summary>
@@ -35,7 +50,7 @@ namespace CK.Javascript
         /// <summary>
         /// Gets the parameter exprssion. Currently makes senses only for <see cref="BreakingType.Return"/>.
         /// </summary>
-        public Expr Parameter { get; private set; }
+        public Expr ReturnedValue { get; private set; }
 
         [DebuggerStepThrough]
         internal protected override T Accept<T>( IExprVisitor<T> visitor )
@@ -52,7 +67,7 @@ namespace CK.Javascript
                 case BreakingType.Continue: return p = "continue"; break;
                 default: p = "return"; break;
             }
-            if( Parameter != null ) p += ' ' + Parameter.ToString();
+            if( ReturnedValue != null ) p += ' ' + ReturnedValue.ToString();
             return p + ';';
         }
     }

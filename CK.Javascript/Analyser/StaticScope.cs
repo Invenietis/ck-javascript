@@ -244,7 +244,7 @@ namespace CK.Javascript
         /// Gets the global scope content.
         /// </summary>
         /// <returns>The global scope. Empty if GlobalScope is false (or if nothing has been declared at the global scope).</returns>
-        public IReadOnlyList<Expr> Globals
+        public IReadOnlyList<AccessorDeclVarExpr> Globals
         {
             get { return _firstScope == null ? CKReadOnlyListEmpty<AccessorDeclVarExpr>.Empty : _firstScope.RetrieveValues( this, false ); }
         }
@@ -259,6 +259,14 @@ namespace CK.Javascript
             NameEntry t;
             if( _vars.TryGetValue( name, out t ) ) return (t.Next ?? t).E;
             return null;
+        }
+
+        /// <summary>
+        /// Gets the registered expression in the current scope.
+        /// </summary>
+        public IReadOnlyList<AccessorDeclVarExpr> Current
+        {
+            get { return _firstScope == null ? CKReadOnlyListEmpty<AccessorDeclVarExpr>.Empty : (_firstScope.NextScope ?? _firstScope).RetrieveValues( this, false ); }
         }
     }
 

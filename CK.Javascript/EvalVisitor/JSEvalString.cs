@@ -31,6 +31,8 @@ namespace CK.Javascript
 {
     public class JSEvalString : RuntimeObj, IComparable
     {
+        static public readonly JSEvalString EmptyString = new JSEvalString( String.Empty );
+
         string _value;
 
         public JSEvalString( string value )
@@ -82,13 +84,13 @@ namespace CK.Javascript
         public override PExpr Visit( IAccessorFrame frame )
         {
             var s = frame.GetState( c =>
-                c.On( "charAt" ).OnCall( 1, ( f, args ) =>
+                c.On( "charAt" ).OnCall( ( f, args ) =>
                 {
                     int idx = args.Count > 0 ? JSSupport.ToInt32( args[0].ToDouble() ) : 0;
-                    if( idx < 0 || idx >= _value.Length ) return f.SetResult( f.Global.EmptyString );
+                    if( idx < 0 || idx >= _value.Length ) return f.SetResult( JSEvalString.EmptyString );
                     return f.SetResult( f.Global.CreateString( new String( _value[idx], 1 ) ) );
                 } )
-                .On( "toString" ).OnCall( 0, ( f, args ) =>
+                .On( "toString" ).OnCall( ( f, args ) =>
                 {
                     return f.SetResult( this );
                 }

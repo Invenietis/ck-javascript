@@ -31,60 +31,11 @@ namespace CK.Javascript
 {
     public class GlobalContext : IAccessorVisitor
     {
-        JSEvalNumber _nan;
-        JSEvalNumber _zero;
-        JSEvalNumber _infinity;
-        JSEvalNumber _negativeInfinity;
-        JSEvalString _emptyString;
-        JSEvalBoolean _true;
-        JSEvalBoolean _false;
         JSEvalDate _epoch;
 
         public GlobalContext()
         {
-            _nan = new JSEvalNumber( Double.NaN );
-            _zero = new JSEvalNumber( 0 );
-            _infinity = new JSEvalNumber( Double.PositiveInfinity );
-            _negativeInfinity = new JSEvalNumber( Double.NegativeInfinity );
-            _emptyString = new JSEvalString( String.Empty );
-            _true = new JSEvalBoolean( true );
-            _false = new JSEvalBoolean( false );
             _epoch = new JSEvalDate( JSSupport.JSEpoch );
-        }
-
-        public JSEvalNumber NaN
-        {
-            get { return _nan; }
-        }
-
-        public JSEvalNumber Infinity
-        {
-            get { return _infinity; }
-        }
-
-        public JSEvalNumber NegativeInfinity
-        {
-            get { return _negativeInfinity; }
-        }
-
-        public JSEvalNumber Zero
-        {
-            get { return _zero; }
-        }
-
-        public JSEvalString EmptyString
-        {
-            get { return _emptyString; }
-        }
-
-        public JSEvalBoolean True
-        {
-            get { return _true; }
-        }
-
-        public JSEvalBoolean False
-        {
-            get { return _false; }
         }
 
         public JSEvalDate Epoch
@@ -94,12 +45,12 @@ namespace CK.Javascript
 
         public RuntimeObj CreateBoolean( bool value )
         {
-            return value ? True : False;
+            return value ? JSEvalBoolean.True : JSEvalBoolean.False;
         }
 
         public RuntimeObj CreateBoolean( RuntimeObj o )
         {
-            if( o == null ) return _false;
+            if( o == null ) return JSEvalBoolean.False;
             if( o is JSEvalBoolean ) return o;
             o = o.ToPrimitive( this );
             if( o is JSEvalBoolean ) return o;
@@ -108,16 +59,16 @@ namespace CK.Javascript
 
         public RuntimeObj CreateNumber( double value )
         {
-            if( value == 0 ) return _zero;
-            if( Double.IsNaN( value ) ) return _nan;
-            if( Double.IsPositiveInfinity( value ) ) return _infinity;
-            if( Double.IsNegativeInfinity( value ) ) return _negativeInfinity;
+            if( value == 0 ) return JSEvalNumber.Zero;
+            if( Double.IsNaN( value ) ) return JSEvalNumber.NaN;
+            if( Double.IsPositiveInfinity( value ) ) return JSEvalNumber.Infinity;
+            if( Double.IsNegativeInfinity( value ) ) return JSEvalNumber.NegativeInfinity;
             return new JSEvalNumber( value );
         }
 
         public RuntimeObj CreateNumber( RuntimeObj o )
         {
-            if( o == null ) return _zero;
+            if( o == null ) return JSEvalNumber.Zero;
             if( o is JSEvalNumber ) return o;
             o = o.ToPrimitive( this );
             if( o is JSEvalNumber ) return o;
@@ -127,7 +78,7 @@ namespace CK.Javascript
         public RuntimeObj CreateString( string value )
         {
             if( value == null ) return RuntimeObj.Null;
-            if( value.Length == 0 ) return _emptyString;
+            if( value.Length == 0 ) return JSEvalString.EmptyString;
             return new JSEvalString( value );
         }
 
@@ -173,24 +124,24 @@ namespace CK.Javascript
         public virtual PExpr Visit( IAccessorFrame frame )
         {
             var s = frame.GetState( c =>
-                c.On( "Number" ).OnCall( 1, ( f, args ) =>
+                c.On( "Number" ).OnCall( ( f, args ) =>
                 {
-                    if( args.Count == 0 ) return f.SetResult( Zero );
+                    if( args.Count == 0 ) return f.SetResult( JSEvalNumber.Zero );
                     return f.SetResult( CreateNumber( args[0] ) );
                 }
                 )
-                .On( "String" ).OnCall( 1, ( f, args ) =>
+                .On( "String" ).OnCall( ( f, args ) =>
                 {
-                    if( args.Count == 0 ) return f.SetResult( EmptyString );
+                    if( args.Count == 0 ) return f.SetResult( JSEvalString.EmptyString );
                     return f.SetResult( CreateString( args[0] ) );
 
                 } )
-                .On( "Boolean" ).OnCall( 1, ( f, args ) =>
+                .On( "Boolean" ).OnCall( ( f, args ) =>
                 {
-                    if( args.Count == 0 ) return f.SetResult( False );
+                    if( args.Count == 0 ) return f.SetResult( JSEvalBoolean.False );
                     return f.SetResult( CreateBoolean( args[0] ) );
                 } )
-                .On( "Date" ).OnCall( 7, ( f, args ) =>
+                .On( "Date" ).OnCall( ( f, args ) =>
                 {
                     try
                     {

@@ -28,16 +28,17 @@ namespace CK.Javascript
             _vars = new Dictionary<AccessorDeclVarExpr, Entry>();
         }
 
-        public void Register( AccessorDeclVarExpr local )
+        public RefRuntimeObj Register( AccessorDeclVarExpr local )
         {
             Entry e;
             if( _vars.TryGetValue( local, out e ) )
             {
                 if( e.O == null ) e.O = new RefRuntimeObj();
-                else if( e.Next == null ) e.Next = new Entry( null );
-                else e.Next = new Entry( e.Next );
+                else if( e.Next == null ) e = e.Next = new Entry( null );
+                else e = e.Next = new Entry( e.Next );
             }
-            else _vars.Add( local, new Entry( null ) );
+            else _vars.Add( local, e = new Entry( null ) );
+            return e.O;
         }
 
         public void Unregister( AccessorDeclVarExpr local )

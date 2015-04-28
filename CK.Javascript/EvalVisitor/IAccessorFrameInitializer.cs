@@ -28,9 +28,8 @@ namespace CK.Javascript
         /// <summary>
         /// Registers a call to a function.
         /// </summary>
-        /// <param name="maxParameterCount">Maximum parameters count (others will be ignored).</param>
         /// <param name="code">Handler that must actually do the call.</param>
-        IAccessorFrameInitializer OnCall( int maxParameterCount, Func<IAccessorFrame, IReadOnlyList<RuntimeObj>, PExpr> code );
+        IAccessorFrameInitializer OnCall( Func<IAccessorFrame, IReadOnlyList<RuntimeObj>, PExpr> code );
 
     }
 

@@ -152,11 +152,11 @@ namespace CK.Javascript
                                 }
                             case (int)JSTokeniserToken.Modulo & 15:
                                 {
-                                    if( right == Global.Zero || left == Global.NegativeInfinity || left == Global.Infinity )
+                                    if( right == JSEvalNumber.Zero || left == JSEvalNumber.NegativeInfinity || left == JSEvalNumber.Infinity )
                                     {
-                                        result = Global.NaN;
+                                        result = JSEvalNumber.NaN;
                                     }
-                                    else if( left == Global.NegativeInfinity || left == Global.Infinity )
+                                    else if( left == JSEvalNumber.NegativeInfinity || left == JSEvalNumber.Infinity )
                                     {
                                         result = right;
                                     }
@@ -218,27 +218,27 @@ namespace CK.Javascript
 
             RuntimeObj BitwiseShift( RuntimeObj val, RuntimeObj shift, bool right )
             {
-                if( val == Global.Zero ) return val;
+                if( val == JSEvalNumber.Zero ) return val;
                 double dR = shift.ToDouble();
                 int iShift;
                 if( Double.IsNaN( dR ) || (iShift = (dR < 0 ? (int)Math.Ceiling( dR ) : (int)Math.Floor( dR )) % 64) == 0 ) return Global.CreateNumber( val );
-                if( right && iShift < 0 ) return Global.Zero;
+                if( right && iShift < 0 ) return JSEvalNumber.Zero;
                 Int32 lN = JSSupport.ToInt32( val.ToDouble() );
-                if( lN == 0 ) return Global.Zero;
+                if( lN == 0 ) return JSEvalNumber.Zero;
                 return Global.CreateNumber( right ? lN >> iShift : lN << iShift );
             }
 
             RuntimeObj BitwiseShiftRightUnsigned( RuntimeObj left, RuntimeObj right )
             {
-                if( left == Global.Zero ) return left;
+                if( left == JSEvalNumber.Zero ) return left;
                 
                 double dR = right.ToDouble();
                 if( Double.IsNaN( dR ) ) return Global.CreateNumber( left );
                 int iShift = (dR < 0 ? (int)Math.Ceiling( dR ) : (int)Math.Floor( dR )) % 64;
-                if( iShift < 0 ) return Global.Zero;
+                if( iShift < 0 ) return JSEvalNumber.Zero;
 
                 UInt32 lN = (UInt32)JSSupport.ToInt64( left.ToDouble() );
-                if( lN == 0 ) return Global.Zero;
+                if( lN == 0 ) return JSEvalNumber.Zero;
 
                 return Global.CreateNumber( lN >> iShift );
             }

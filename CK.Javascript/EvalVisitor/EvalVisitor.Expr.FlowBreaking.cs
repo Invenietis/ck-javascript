@@ -45,9 +45,9 @@ namespace CK.Javascript
 
             protected override PExpr DoVisit()
             {
-                if( Expr.Parameter != null )
+                if( Expr.ReturnedValue != null )
                 {
-                    if( IsPendingOrSignal( ref _returns, Expr.Parameter ) ) return PendingOrSignal( _returns );
+                    if( IsPendingOrSignal( ref _returns, Expr.ReturnedValue ) ) return PendingOrSignal( _returns );
                     return SetResult( new RuntimeFlowBreaking( Expr, _returns.Result ) );
                 }
                 return SetResult( new RuntimeFlowBreaking( Expr ) );

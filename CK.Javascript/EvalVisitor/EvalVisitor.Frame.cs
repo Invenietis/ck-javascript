@@ -36,7 +36,7 @@ namespace CK.Javascript
         /// This is a basic frame object that captures an evaluation step. 
         /// The "stack" is implemented with links to a previous and next frames.
         /// </summary>
-        protected abstract class Frame : IDeferredExpr
+        internal abstract class Frame : IDeferredExpr
         {          
             internal readonly EvalVisitor _visitor;
             readonly Expr _expr;
@@ -161,7 +161,7 @@ namespace CK.Javascript
             }
         }
 
-        protected abstract class Frame<T> : Frame where T : Expr
+        internal abstract class Frame<T> : Frame where T : Expr
         {
             protected Frame( EvalVisitor evaluator, T e )
                 : base( evaluator, e )

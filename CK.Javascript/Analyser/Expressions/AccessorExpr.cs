@@ -40,8 +40,7 @@ namespace CK.Javascript
         }
 
         /// <summary>
-        /// Gets the argument list. This default implementation applies to specialized <see cref="AccessorMemberExpr"/>: 
-        /// a member (or field) is not callable.
+        /// Gets the argument list: null for <see cref="AccessorMemberExpr"/> and <see cref="AccessorDeclVarExpr"/> (a member or field is not callable).
         /// </summary>
         public virtual IReadOnlyList<Expr> Arguments
         {
@@ -106,7 +105,6 @@ namespace CK.Javascript
             return "var " + Name;
         }
     }
-
 
     public class AccessorIndexerExpr : AccessorExpr
     {

@@ -153,8 +153,16 @@ namespace CK.Javascript
 
         public virtual Expr Visit( FlowBreakingExpr e )
         {
-            var rV = e.Parameter != null ? VisitExpr( e.Parameter ) : null;
-            return rV == e.Parameter ? e : new FlowBreakingExpr( e.Location, e.Type, rV );
+            var rV = e.ReturnedValue != null ? VisitExpr( e.ReturnedValue ) : null;
+            return rV == e.ReturnedValue ? e : new FlowBreakingExpr( e.Location, e.Type, rV );
+        }
+
+        public virtual Expr Visit( FunctionExpr e )
+        {
+            var nV = (AccessorDeclVarExpr)(e.Name != null ? Visit( e.Name ) : null);
+            var pV = (IReadOnlyList<AccessorDeclVarExpr>)Visit( e.Parameters );
+            var bV = VisitExpr( e.Body );
+            return nV == e.Name && pV == e.Parameters && bV == e.Body ? e : new FunctionExpr( e.Location, pV, bV, nV );
         }
 
     }

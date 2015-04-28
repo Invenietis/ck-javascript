@@ -1,6 +1,6 @@
 #region LGPL License
 /*----------------------------------------------------------------------------
-* This file (CK.Javascript\EvalVisitor\JSEvalBoolean.cs) is part of CiviKey. 
+* This file (Tests\CK.Javascript.Tests\EvalTests.cs) is part of CiviKey. 
 *  
 * CiviKey is free software: you can redistribute it and/or modify 
 * it under the terms of the GNU Lesser General Public License as published 
@@ -25,40 +25,32 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CK.Core;
+using NUnit.Framework;
+using CK.Javascript;
 
-namespace CK.Javascript
+namespace CK.Javascript.Tests
 {
-    public class JSEvalBoolean : RuntimeObj
+    [TestFixture]
+    public class FunctionTests
     {
-        public static readonly JSEvalBoolean True = new JSEvalBoolean( true );
-        public static readonly JSEvalBoolean False = new JSEvalBoolean( false );
-
-        bool _value;
-
-        JSEvalBoolean( bool v )
+        [Test]
+        public void functions_are_runtime_objects()
         {
-            _value = v;
+            string s = @"function yo(a) { return 'yo' + a; }";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalFunction>( o );
+            var f = (JSEvalFunction)o;
+            CollectionAssert.AreEqual( new[]{ "a" }, f.Expr.Parameters.Select( p => p.Name ).ToArray() );
         }
 
-        public override string Type
+        [Test]
+        public void functions_are_callable()
         {
-            get { return RuntimeObj.TypeBoolean; }
-        }
-
-        public override bool ToBoolean()
-        {
-            return _value;
-        }
-
-        public override double ToDouble()
-        {
-            return _value ? 1.0 : 0.0;
-        }
-
-        public override string ToString()
-        {
-            return _value ? JSSupport.TrueString : JSSupport.FalseString;
+            string s = @"function yo(a) { return 'yo' + a; }
+                         yo('b');";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalString>( o );
+            Assert.That( o.ToString(), Is.EqualTo( "yob" ) );
         }
 
     }
