@@ -180,15 +180,15 @@ namespace CK.Javascript
             protected override PExpr DoVisit()
             {
                 if( IsPendingOrSignal( ref _left, Expr.Left ) ) return ReentrantPendingOrSignal( _left );
+                // A visit of the left may have set a result farther in the accessor chain:
+                // if Result is set, we leave.
                 if( Result != null ) return new PExpr( Result );
-                RefRuntimeObj l = _left.Result as RefRuntimeObj;
-                if( l != null )
-                {
-                    Debug.Assert( !_result.IsResolved );
-                    if( (_result = l.Value.Visit( this )).IsPendingOrSignal ) return ReentrantPendingOrSignal( _result );
-                    return ReentrantSetResult( _result.Result );
-                }
-                return SetError();
+
+                Debug.Assert( _left.Result != null, "We are not pendig..." );
+                var left = _left.Result.ToValue();
+                Debug.Assert( !_result.IsResolved );
+                if( (_result = left.Visit( this )).IsPendingOrSignal ) return ReentrantPendingOrSignal( _result );
+                return ReentrantSetResult( _result.Result );
             }
 
             public IAccessorFrameState GetState( Action<IAccessorFrameInitializer> configuration )

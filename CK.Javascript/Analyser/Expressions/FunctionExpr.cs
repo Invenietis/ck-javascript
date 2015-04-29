@@ -11,14 +11,16 @@ namespace CK.Javascript
 
     public class FunctionExpr : Expr
     {
-        public FunctionExpr( SourceLocation location, IReadOnlyList<AccessorDeclVarExpr> parameters, Expr body, AccessorDeclVarExpr name = null )
+        public FunctionExpr( SourceLocation location, IReadOnlyList<AccessorDeclVarExpr> parameters, Expr body, IReadOnlyList<AccessorDeclVarExpr> closures, AccessorDeclVarExpr name = null )
             : base( location, false )
         {
             if( parameters == null ) throw new ArgumentNullException();
             if( body == null ) throw new ArgumentNullException();
+            if( closures == null ) throw new ArgumentNullException();
             Parameters = parameters;
             Name = name;
             Body = body;
+            Closures = closures;
         }
 
         public Expr Body { get; private set; }
@@ -26,6 +28,8 @@ namespace CK.Javascript
         public AccessorDeclVarExpr Name { get; private set; }
 
         public IReadOnlyList<AccessorDeclVarExpr> Parameters { get; private set; }
+
+        public IReadOnlyList<AccessorDeclVarExpr> Closures { get; private set; }
 
         [DebuggerStepThrough]
         internal protected override T Accept<T>( IExprVisitor<T> visitor )

@@ -162,7 +162,8 @@ namespace CK.Javascript
             var nV = (AccessorDeclVarExpr)(e.Name != null ? Visit( e.Name ) : null);
             var pV = (IReadOnlyList<AccessorDeclVarExpr>)Visit( e.Parameters );
             var bV = VisitExpr( e.Body );
-            return nV == e.Name && pV == e.Parameters && bV == e.Body ? e : new FunctionExpr( e.Location, pV, bV, nV );
+            var cV = (IReadOnlyList<AccessorDeclVarExpr>)Visit( e.Closures );
+            return nV == e.Name && pV == e.Parameters && bV == e.Body && cV == e.Closures ? e : new FunctionExpr( e.Location, pV, bV, cV, nV );
         }
 
     }

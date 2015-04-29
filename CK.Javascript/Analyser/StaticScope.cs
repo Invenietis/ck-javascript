@@ -13,12 +13,20 @@ namespace CK.Javascript
         class Scope
         {
             public Scope NextScope;
+            public readonly Scope StrongScope;
             NameEntry _firstNamed;
             int _count;
+            HashSet<AccessorDeclVarExpr> _closures;
 
-            public Scope( Scope next )
+            public Scope( Scope next, Scope currentStrongScope )
             {
                 NextScope = next;
+                StrongScope = currentStrongScope ?? this;
+            }
+
+            public bool IsStrong
+            {
+                get { return StrongScope == this; }
             }
 
             internal void Add( NameEntry newOne, NameEntry first )
@@ -30,23 +38,34 @@ namespace CK.Javascript
                 ++_count;
             }
 
-            internal IReadOnlyList<AccessorDeclVarExpr> RetrieveValues( StaticScope container, bool close )
+            internal IReadOnlyList<AccessorDeclVarExpr> RetrieveValues( StaticScope container, bool close, int skipCount = 0 )
             {
-                if( _count == 0 ) return Util.EmptyArray<AccessorDeclVarExpr>.Empty;
-                int i = _count;
+                if( skipCount < 0 ) throw new ArgumentException( "skipCount" );
+                int i = _count - skipCount;
+                if( i <= 0 ) return Util.EmptyArray<AccessorDeclVarExpr>.Empty;
                 var all = new AccessorDeclVarExpr[i];
                 NameEntry first = _firstNamed;
-                for( ; ; )
+                do
                 {
                     NameEntry e = first.Next ?? first;
                     Debug.Assert( e.E != null );
-                    all[--i] = e.E;
+                    if( i > 0 ) all[--i] = e.E;
                     if( close ) container.Unregister( first );
-                    if( i == 0 ) break;
                     first = e.NextInScope;
-                    Debug.Assert( first != null );
                 }
+                while( first != null );
                 return all;
+            }
+
+            internal void AddClosure( AccessorDeclVarExpr a )
+            {
+                if( _closures == null ) _closures = new HashSet<AccessorDeclVarExpr>();
+                _closures.Add( a );
+            }
+
+            internal IReadOnlyList<AccessorDeclVarExpr> GetClosures()
+            {
+                return _closures != null ? _closures.ToArray() : Util.EmptyArray<AccessorDeclVarExpr>.Empty;
             }
         }
 
@@ -82,6 +101,7 @@ namespace CK.Javascript
         Scope _firstScope;
         readonly Dictionary<string,NameEntry> _vars;
         readonly bool _globalScope;
+        Scope _currentStrongScope;
         bool _allowMasking;
         bool _disallowRegistration;
         bool _allowLocalRedefinition;
@@ -105,7 +125,7 @@ namespace CK.Javascript
             _allowMasking = allowMasking;
             _allowLocalRedefinition = allowLocalRedefinition;
             _globalScope = globalScope;
-            if( _globalScope ) _firstScope = new Scope( null );
+            if( _globalScope ) _firstScope = new Scope( null, null );
         }
 
         /// <summary>
@@ -157,6 +177,7 @@ namespace CK.Javascript
         {
             if( _firstScope == null ) return new SyntaxErrorExpr( e.Location, "Invalid declaration (a scope must be opened first)." );
             if( _disallowRegistration ) return new SyntaxErrorExpr( e.Location, "Invalid declaration." );
+            var curScope = _firstScope.NextScope ?? _firstScope;
             NameEntry first, newOne;
             if( _vars.TryGetValue( name, out first ) )
             {
@@ -165,13 +186,14 @@ namespace CK.Javascript
                     first.E = e;
                     newOne = first;
                 }
-                else if( _allowMasking )
+                else
                 {
-                    if( first.Next == null )
+                    var cur = first.Next ?? first;
+                    if( _allowMasking || cur.Scope.StrongScope != _currentStrongScope )
                     {
-                        if( _allowLocalRedefinition || first.Scope != (_firstScope.NextScope ?? _firstScope) )
+                        if( _allowLocalRedefinition || cur.Scope != curScope )
                         {
-                            first.Next = newOne = new NameEntry( null, e );
+                            first.Next = newOne = new NameEntry( first.Next, e );
                         }
                         else
                         {
@@ -180,20 +202,12 @@ namespace CK.Javascript
                     }
                     else
                     {
-                        if( _allowLocalRedefinition || first.Next.Scope != (_firstScope.NextScope ?? _firstScope) )
-                        {
-                            first.Next = newOne = new NameEntry( first.Next, e );
-                        }
-                        else return new SyntaxErrorExpr( e.Location, "Declaration conflicts with declaration at {0}.", first.Next.E.Location );
+                        return new SyntaxErrorExpr( e.Location, "Masking is not allowed: declaration conflicts with declaration at {0}.", first.E.Location );
                     }
-                }
-                else
-                {
-                    return new SyntaxErrorExpr( e.Location, "Masking is not allowed: declaration conflicts with declaration at {0}.", first.E.Location );
                 }
             }
             else _vars.Add( name, (first = newOne = new NameEntry( null, e )) );
-            (_firstScope.NextScope ?? _firstScope).Add( newOne, first );
+            curScope.Add( newOne, first );
             return e;
         }
 
@@ -210,25 +224,41 @@ namespace CK.Javascript
         }
 
         /// <summary>
-        /// Opens a new scope: any <see cref="Declare"/> will be done in this new scope.
+        /// Opens a new scope (a weak one): any <see cref="Declare"/> will be done in this new scope.
         /// </summary>
+        /// <param name="strongScope">True to open a strong scope: any access to a variable declared above will require a closure.</param>
         public void OpenScope()
         {
-            if( _firstScope == null ) _firstScope = new Scope( null );
-            else _firstScope.NextScope = new Scope( _firstScope.NextScope );
+            if( _firstScope == null ) _currentStrongScope = _firstScope = new Scope( null, null );
+            else _firstScope.NextScope = new Scope( _firstScope.NextScope, _currentStrongScope );
         }
 
         /// <summary>
-        /// Closes the current scope and returns all the declared expressions in the order of their declarations.
+        /// Opens a new strong scope: any <see cref="Declare"/> will be done in this new scope and all access to variables above it
+        /// will register the closure.
         /// </summary>
-        /// <returns>The declared expressions (an empty list if nothing has been declared).</returns>
-        public IReadOnlyList<AccessorDeclVarExpr> CloseScope()
+        public void OpenStrongScope()
+        {
+            if( _firstScope == null ) _currentStrongScope = _firstScope = new Scope( null, null );
+            else
+            {
+                _firstScope.NextScope = new Scope( _firstScope.NextScope, null );
+                _currentStrongScope = _firstScope.NextScope;
+            }
+        }
+
+        /// <summary>
+        /// Closes the current scope and returns all the declared variables in the order of their declarations, optionnaly skipping the first ones.
+        /// </summary>
+        /// <returns>The declared expressions (an empty list if nothing has been declared or skipCount is too big).</returns>
+        public IReadOnlyList<AccessorDeclVarExpr> CloseScope( int skipCount = 0 )
         {
             if( _firstScope == null ) throw new InvalidOperationException( "No Scope opened." );
             if( _firstScope != null && _firstScope.NextScope == null && _globalScope ) throw new InvalidOperationException( "The GlobalScope can not be closed." );
             Scope closing;
             if( _firstScope.NextScope == null )
             {
+                Debug.Assert( _currentStrongScope == _firstScope, "Root is always a Strong scope by design." );
                 closing = _firstScope;
                 _firstScope = null;
             }
@@ -236,8 +266,24 @@ namespace CK.Javascript
             {
                 closing = _firstScope.NextScope;
                 _firstScope.NextScope = closing.NextScope;
+                if( _firstScope.NextScope != null ) _currentStrongScope = _firstScope.NextScope.StrongScope;
+                else _currentStrongScope = _firstScope;
             }
-            return closing.RetrieveValues( this, true );
+            return closing.RetrieveValues( this, true, skipCount );
+        }
+
+        /// <summary>
+        /// Closes the current strong scope and returns the closures (in the key) and all the declared expressions in the order of their declarations (in the value).
+        /// If the current one is not a strong one, an exception is thrown.
+        /// </summary>
+        /// <returns>The declared expressions (an empty list if nothing has been declared).</returns>
+        public KeyValuePair<IReadOnlyList<AccessorDeclVarExpr>, IReadOnlyList<AccessorDeclVarExpr>> CloseStrongScope( int skipLocalCount = 0 )
+        {
+            if( _firstScope == null ) throw new InvalidOperationException( "No Scope opened." );
+            var curScope = _firstScope.NextScope ?? _firstScope;
+            if( !curScope.IsStrong ) throw new InvalidOperationException( "The scope is not a strong one." );
+            var closures = curScope.GetClosures();
+            return new KeyValuePair<IReadOnlyList<AccessorDeclVarExpr>, IReadOnlyList<AccessorDeclVarExpr>>( closures, CloseScope( skipLocalCount ) );
         }
 
         /// <summary>
@@ -251,10 +297,11 @@ namespace CK.Javascript
 
         /// <summary>
         /// Obtains a named <see cref="Expr"/> if it exists. Null otherwise.
+        /// This does not track closure.
         /// </summary>
         /// <param name="name">Name in the scope.</param>
         /// <returns>Null if not found.</returns>
-        public Expr Find( string name )
+        public AccessorDeclVarExpr Find( string name )
         {
             NameEntry t;
             if( _vars.TryGetValue( name, out t ) ) return (t.Next ?? t).E;
@@ -262,11 +309,32 @@ namespace CK.Javascript
         }
 
         /// <summary>
-        /// Gets the registered expression in the current scope.
+        /// Like <see cref="Find"/> but if the variable belongs to another strong scope than the current one, it is registered
+        /// in the Closures of its strong scope.
         /// </summary>
-        public IReadOnlyList<AccessorDeclVarExpr> Current
+        /// <param name="name">Name in the scope.</param>
+        /// <returns>Null if not found.</returns>
+        public AccessorDeclVarExpr FindAndRegisterClosure( string name )
         {
-            get { return _firstScope == null ? CKReadOnlyListEmpty<AccessorDeclVarExpr>.Empty : (_firstScope.NextScope ?? _firstScope).RetrieveValues( this, false ); }
+            NameEntry t;
+            if( _vars.TryGetValue( name, out t ) )
+            {
+                if( t.Next != null ) t = t.Next;
+                if( t.Scope.StrongScope != _currentStrongScope )
+                {
+                    _currentStrongScope.AddClosure( t.E );
+                }
+                return t.E;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the variables registered in the current scope so far, optionnaly skipping the first ones.
+        /// </summary>
+        public IReadOnlyList<AccessorDeclVarExpr> GetCurrent( int skipCount = 0 )
+        {
+            return _firstScope == null ? CKReadOnlyListEmpty<AccessorDeclVarExpr>.Empty : (_firstScope.NextScope ?? _firstScope).RetrieveValues( this, false, skipCount );
         }
     }
 

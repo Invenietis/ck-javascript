@@ -36,12 +36,14 @@ namespace CK.Javascript
         internal class FunctionExprFrame : Frame<FunctionExpr>
         {
             readonly FrameStateBase _arguments;
+            readonly IReadOnlyList<Closure> _closures;
             PExpr _body;
 
-            public FunctionExprFrame( AccessorFrame callFrame, FunctionExpr e )
+            public FunctionExprFrame( AccessorFrame callFrame, FunctionExpr e, IReadOnlyList<Closure> closures )
                 : base( callFrame._visitor, e )
             {
                 _arguments = new FrameStateBase( this, callFrame.Expr.Arguments );
+                _closures = closures;
             }
 
             protected override PExpr DoVisit()
@@ -49,13 +51,20 @@ namespace CK.Javascript
                 PExpr args = _arguments.VisitArguments();
                 if( args.IsPendingOrSignal ) return args;
 
+                // Registering parameters.
                 int iParam = 0;
-                foreach( var local in Expr.Parameters )
+                foreach( var parameter in Expr.Parameters )
                 {
-                    var r = _visitor._dynamicScope.Register( local );
+                    var r = _visitor._dynamicScope.Register( parameter );
                     if( iParam < _arguments.ResolvedParameters.Count ) r.Value = _arguments.ResolvedParameters[iParam];
                     ++iParam;
                 }
+                // Registering closed variables.
+                foreach( var c in _closures )
+                {
+                    _visitor._dynamicScope.Register( c );
+                }
+
                 if( IsPendingOrSignal( ref _body, Expr.Body ) )
                 {
                     if( _body.IsSignal )
@@ -68,7 +77,7 @@ namespace CK.Javascript
                     }
                     return PendingOrSignal( _body );
                 }
-                return new PExpr( RuntimeObj.Undefined );
+                return SetResult( RuntimeObj.Undefined );
             }
 
             protected override void OnDispose()
@@ -77,12 +86,22 @@ namespace CK.Javascript
                 {
                     _visitor._dynamicScope.Unregister( local );
                 }
+                foreach( var c in _closures )
+                {
+                    _visitor._dynamicScope.Unregister( c.Variable );
+                }
             }
         }
 
         public PExpr Visit( FunctionExpr e )
         {
-            return new PExpr( new JSEvalFunction( e ) );
+            Closure[] c = new Closure[e.Closures.Count];
+            for( int i = 0; i < c.Length; ++i )
+            {
+                var v = e.Closures[i];
+                c[i] = new Closure( v, _dynamicScope.FindRegistered( v ) );
+            }
+            return new PExpr( new JSEvalFunction( e, c ) );
         }
 
     }

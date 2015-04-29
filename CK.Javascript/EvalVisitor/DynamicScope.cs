@@ -15,10 +15,10 @@ namespace CK.Javascript
         {
             public Entry Next;
             public RefRuntimeObj O;
-            public Entry( Entry n ) 
+            public Entry( Entry n, RefRuntimeObj o = null ) 
             { 
                 Next = n;
-                O = new RefRuntimeObj();
+                O = o ?? new RefRuntimeObj();
             }
         }
         readonly Dictionary<AccessorDeclVarExpr,Entry> _vars;
@@ -39,6 +39,19 @@ namespace CK.Javascript
             }
             else _vars.Add( local, e = new Entry( null ) );
             return e.O;
+        }
+
+        public RefRuntimeObj Register( Closure c )
+        {
+            Entry e;
+            if( _vars.TryGetValue( c.Variable, out e ) )
+            {
+                if( e.O == null ) e.O = c.Ref;
+                else if( e.Next == null ) e.Next = new Entry( null, c.Ref );
+                else e = e.Next = new Entry( e.Next, c.Ref );
+            }
+            else _vars.Add( c.Variable, new Entry( null, c.Ref ) );
+            return c.Ref;
         }
 
         public void Unregister( AccessorDeclVarExpr local )

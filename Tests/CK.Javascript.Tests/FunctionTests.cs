@@ -79,5 +79,59 @@ namespace CK.Javascript.Tests
             Assert.That( o.ToString(), Is.EqualTo( "xy" ) );
         }
 
+        [Test]
+        public void closure_is_supported()
+        {
+            string s = @"
+                        function next( s ) 
+                        { 
+                          var _seed = s; 
+                          return function() { return ++_seed; };
+                        }
+                        var f = next(0);
+                        f(0) + f(0) + f(0);
+                        ";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalNumber>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 1 + 2 + 3 ) );
+        }
+
+        [Test]
+        public void closure_with_two_levels()
+        {
+            string s = @"
+                        function next( s ) 
+                        { 
+                            var _seed = s; 
+                            function oneMore() {
+                                return function() { return ++_seed; };
+                            }
+                            return oneMore();
+                        }
+                        var f = next(0);
+                        f(0) + f(0) + f(0);
+                        f = next(0);
+                        f(0) + f(0) + f(0) + f(0);
+                        ";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalNumber>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 1 + 2 + 3 + 4 ) );
+        }
+
+        [Test]
+        public void closure_and_immediately_invoked_function_expression_IIFE()
+        {
+            string s = @"
+                        var i = 10, j = 10; 
+                        (function() { 
+                          i = j + i; 
+                        })();
+                        i.toString();
+                        ";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalString>( o );
+            Assert.That( o.ToString(), Is.EqualTo( "20" ) );
+        }
+
     }
 }

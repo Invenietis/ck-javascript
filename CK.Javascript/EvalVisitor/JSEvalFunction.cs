@@ -31,12 +31,14 @@ namespace CK.Javascript
 {
     public class JSEvalFunction : RuntimeObj
     {
-        FunctionExpr _expr;
+        readonly FunctionExpr _expr;
+        readonly IReadOnlyList<Closure> _closures;
 
-        public JSEvalFunction( FunctionExpr e )
+        internal JSEvalFunction( FunctionExpr e, IReadOnlyList<Closure> closures )
         {
             if( e == null ) throw new ArgumentNullException();
             _expr = e;
+            _closures = closures;
         }
 
         public FunctionExpr Expr 
@@ -68,7 +70,7 @@ namespace CK.Javascript
         {
             if( frame.Expr is AccessorCallExpr )
             {
-                return new EvalVisitor.FunctionExprFrame( (EvalVisitor.AccessorFrame)frame, _expr ).Visit();
+                return new EvalVisitor.FunctionExprFrame( (EvalVisitor.AccessorFrame)frame, _expr, _closures ).Visit();
             }
             return base.Visit( frame );
         }

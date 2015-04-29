@@ -209,15 +209,23 @@ namespace CK.Javascript
                 if( eRegName is SyntaxErrorExpr ) return eRegName;
             }
             if( !_parser.Match( JSTokeniserToken.OpenPar ) ) return new SyntaxErrorExpr( _parser.Location, "Expected '('." );
-            _scope.OpenScope();
+            // We open a strong scope: access to variables above are tracked.
+            _scope.OpenStrongScope();
             Expr error = HandleFuncHeader( name );
             if( error != null )
             {
                 _scope.CloseScope();
                 return error;
             }
-            Expr body = HandleBlock();
-            var f = new FunctionExpr( funcLocation, _scope.CloseScope(), body, funcName );
+            // Get the parameters that have been registered.
+            var parameters = _scope.GetCurrent();
+            List<Expr> statements = new List<Expr>();
+            FillStatements( statements );
+            // Closes the strong scope and get the closures and the locals,
+            // skipping the parameters that have already been handled.
+            var closuresAndLocals = _scope.CloseStrongScope( parameters.Count );
+            Expr body = BlockFromStatements( statements,  closuresAndLocals.Value );
+            var f = new FunctionExpr( funcLocation, parameters, body, closuresAndLocals.Key, funcName );
             if( funcName == null ) return f;
             return new AssignExpr( funcLocation, funcName, f );
         }
@@ -305,15 +313,24 @@ namespace CK.Javascript
             if( first == null ) _scope.OpenScope();
             List<Expr> statements = new List<Expr>();
             if( first != null && first != NopExpr.Default ) statements.Add( first );
+            FillStatements( statements );
+            // Always close the scope.
+            return BlockFromStatements( statements, _scope.CloseScope() );
+        }
+
+        void FillStatements( List<Expr> statements )
+        {
             while( !_parser.Match( JSTokeniserToken.CloseCurly ) && !_parser.IsEndOfInput )
             {
                 Expr e = Expression( 0 );
                 _parser.Match( JSTokeniserToken.SemiColon );
                 if( e != NopExpr.Default ) statements.Add( e );
-                if( e is SyntaxErrorExpr ) break; 
+                if( e is SyntaxErrorExpr ) break;
             }
-            // Always close the scope.
-            var locals = _scope.CloseScope();
+        }
+
+        static Expr BlockFromStatements( List<Expr> statements, IReadOnlyList<AccessorDeclVarExpr> locals )
+        {
             if( statements.Count == 0 ) return NopExpr.Default;
             if( statements.Count == 1 && locals.Count == 0 ) return statements[0];
             return new BlockExpr( statements.ToArray(), locals );
@@ -371,8 +388,8 @@ namespace CK.Javascript
             if( id == "true" ) return new ConstantExpr( _parser.PrevNonCommentLocation, true );
             if( id == "false" ) return new ConstantExpr( _parser.PrevNonCommentLocation, false );
             if( id == "undefined" ) return ConstantExpr.UndefinedExpr;
-            var bound = _scope.Find( id );
-            return bound != null ? bound : new AccessorMemberExpr( _parser.PrevNonCommentLocation, null, id );
+            var bound = _scope.FindAndRegisterClosure( id );
+            return bound != null ? (Expr)bound : new AccessorMemberExpr( _parser.PrevNonCommentLocation, null, id );
         }
 
         Expr HandleUnaryExpr()
