@@ -53,5 +53,31 @@ namespace CK.Javascript.Tests
             Assert.That( o.ToString(), Is.EqualTo( "yob" ) );
         }
 
+        [Test]
+        public void functions_have_multiple_parameters_and_superfluous_actual_parameters_are_ignored()
+        {
+            string s = @"function F(a,b,c,d,e,f,g) { return a+b+c+d+e+f+g; }
+                         F(1,2,3,4,5,6,7,8,9,10,11,12);";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalNumber>( o );
+            Assert.That( o.ToDouble(), Is.EqualTo( 1 + 2 + 3 + 4 + 5 + 6 + 7 ) );
+        }
+
+        [Test]
+        public void functions_are_first_class_objects()
+        {
+            string s = @"
+                            function gen() 
+                            { 
+                              return function(a,b) { return a+b; };
+                            }
+                            var f = gen();
+                            f( 'x', 'y' );
+                        ";
+            RuntimeObj o = ScriptEngine.Evaluate( s );
+            Assert.IsInstanceOf<JSEvalString>( o );
+            Assert.That( o.ToString(), Is.EqualTo( "xy" ) );
+        }
+
     }
 }

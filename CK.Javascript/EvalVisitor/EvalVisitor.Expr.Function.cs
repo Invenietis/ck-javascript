@@ -54,6 +54,7 @@ namespace CK.Javascript
                 {
                     var r = _visitor._dynamicScope.Register( local );
                     if( iParam < _arguments.ResolvedParameters.Count ) r.Value = _arguments.ResolvedParameters[iParam];
+                    ++iParam;
                 }
                 if( IsPendingOrSignal( ref _body, Expr.Body ) )
                 {

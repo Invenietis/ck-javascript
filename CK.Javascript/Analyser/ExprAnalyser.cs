@@ -201,10 +201,13 @@ namespace CK.Javascript
         {
             var funcLocation = _parser.PrevNonCommentLocation;
             string name = _parser.ReadIdentifier();
-            AccessorDeclVarExpr funcName = name != null ? new AccessorDeclVarExpr( _parser.PrevNonCommentLocation, name ) : null;
-            Expr eRegName = _scope.Declare( name, funcName );
-            if( eRegName is SyntaxErrorExpr ) return eRegName;
-
+            AccessorDeclVarExpr funcName = null;
+            if( name != null )
+            {
+                funcName = new AccessorDeclVarExpr( _parser.PrevNonCommentLocation, name );
+                Expr eRegName = _scope.Declare( name, funcName );
+                if( eRegName is SyntaxErrorExpr ) return eRegName;
+            }
             if( !_parser.Match( JSTokeniserToken.OpenPar ) ) return new SyntaxErrorExpr( _parser.Location, "Expected '('." );
             _scope.OpenScope();
             Expr error = HandleFuncHeader( name );
@@ -227,6 +230,7 @@ namespace CK.Javascript
                 AccessorDeclVarExpr param = new AccessorDeclVarExpr( _parser.PrevNonCommentLocation, pName );
                 Expr eRegParam = _scope.Declare( pName, param );
                 if( eRegParam is SyntaxErrorExpr ) return eRegParam;
+                if( !_parser.Match( JSTokeniserToken.Comma ) ) break;
             }
             if( !_parser.Match( JSTokeniserToken.ClosePar ) ) return new SyntaxErrorExpr( _parser.Location, "Expected ')'." );
             if( !_parser.Match( JSTokeniserToken.OpenCurly ) ) return new SyntaxErrorExpr( _parser.Location, "Expected '{{}'." );
