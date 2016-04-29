@@ -45,7 +45,7 @@ namespace CK.Javascript
         {
             List<SyntaxErrorExpr> collector = new List<SyntaxErrorExpr>();
             new SyntaxErrorCollector( collector.Add, unboundCollector ).VisitExpr( e );
-            return collector.ToReadOnlyList();
+            return collector.ToArray();
         }
 
         public override Expr Visit( AccessorMemberExpr e )

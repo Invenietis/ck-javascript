@@ -74,8 +74,8 @@ namespace CK.Javascript
         public int CompareTo( object obj )
         {
             JSEvalString s = obj as JSEvalString;
-            if( s != null ) return String.Compare( _value, s._value, StringComparison.InvariantCulture );
-            if( obj is String ) return String.Compare( _value, (String)obj, StringComparison.InvariantCulture );
+            if( s != null ) return String.Compare( _value, s._value, StringComparison.Ordinal );
+            if( obj is String ) return String.Compare( _value, (String)obj, StringComparison.Ordinal );
             throw new ArgumentException( "Must be a string.", "obj" );
         }
 

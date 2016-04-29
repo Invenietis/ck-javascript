@@ -31,7 +31,6 @@ using CK.Core;
 
 namespace CK.Javascript.Tests
 {
-    [TestFixture]
     public class JSAnalyserTests
     {
         [Test]

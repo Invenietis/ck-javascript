@@ -73,7 +73,7 @@ namespace CK.Javascript
                     newArgs[i] = sp;
                 }
             }
-            if( newArgs != null ) args = newArgs.ToReadOnlyList();
+            if( newArgs != null ) args = newArgs.ToArray();
             return args;
         }
 

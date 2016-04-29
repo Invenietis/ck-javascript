@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>CK.Javascript</id>
+    <version>$version$</version>
+    <authors>Invenietis</authors>
+    <owners>Invenietis</owners>
+    <projectUrl>https://invenietis.visualstudio.com/DefaultCollection/CK/_git/ck-mailer</projectUrl>
+    <dependencies>
+      <dependency id="CK.Core" version="5.0.0-d03" />
+    </dependencies>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>CK.Mailer provides mailer with default templating method</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src="CK.Javascript\bin\{{configuration}}\CK.Javascript.dll" target="lib\net451" />
+  </files>
+</package>

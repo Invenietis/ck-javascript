@@ -30,7 +30,6 @@ using NUnit.Framework;
 
 namespace CK.Javascript.Tests
 {
-    [TestFixture]
     public class WithGlobalContext
     {
         class Context : GlobalContext

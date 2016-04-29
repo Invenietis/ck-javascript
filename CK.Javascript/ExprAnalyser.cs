@@ -136,7 +136,7 @@ namespace CK.Javascript
                     }
                 }
             }
-            var arguments = parameters != null ? parameters.ToReadOnlyList() : CKReadOnlyListEmpty<Expr>.Empty;
+            var arguments = parameters != null ? parameters.ToArray() : Util.Array.Empty<Expr>();
             return new AccessorCallExpr( loc, left, arguments );
         }
 

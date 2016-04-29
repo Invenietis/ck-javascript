@@ -30,7 +30,6 @@ using CK.Javascript;
 
 namespace CK.Javascript.Tests
 {
-    [TestFixture]
     public class SyntaxicScopeTests
     {
         [Test]

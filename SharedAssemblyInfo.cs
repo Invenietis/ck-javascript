@@ -29,14 +29,9 @@ using System.Reflection;
 [assembly: AssemblyCopyright("Copyright (c) Invenietis 2013-2015")]
 [assembly: AssemblyTrademark("")]
 
-[assembly: AssemblyVersion("1.2.1")]
-
 
 #if DEBUG
     [assembly: AssemblyConfiguration("Debug")]
 #else
     [assembly: AssemblyConfiguration("Release")]
 #endif
-
-// Added by CKReleaser.
-[assembly: AssemblyInformationalVersion( "%ck-standard%" )]
