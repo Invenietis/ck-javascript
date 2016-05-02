@@ -70,10 +70,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="NuSpec\CK.Javascript.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="NuSpec\" />
     <Folder Include="Releases\" />
     <Folder Include="Tools\" />
   </ItemGroup>
