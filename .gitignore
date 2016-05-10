@@ -31,3 +31,4 @@ Runtime/Current/
 /packages/
 *.nupkg
 *.Tests.VisualState.xml
+desktop.ini
