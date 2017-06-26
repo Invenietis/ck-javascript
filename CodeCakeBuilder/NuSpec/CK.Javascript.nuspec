@@ -7,7 +7,7 @@
     <owners>Invenietis</owners>
     <projectUrl>https://invenietis.visualstudio.com/DefaultCollection/CK/_git/ck-mailer</projectUrl>
     <dependencies>
-      <dependency id="CK.Core" version="5.0.0-d03" />
+      <dependency id="CK.Core" version="7.0.0" />
     </dependencies>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>CK.Mailer provides mailer with default templating method</description>
